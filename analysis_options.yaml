@@ -1,0 +1,24 @@
+include: package:flutter_lints/flutter.yaml
+
+formatter:
+  page_width: 100
+
+analyzer:
+  language:
+    strict-casts: true
+    strict-raw-types: true
+  errors:
+    # 忘记 await 往往是 bug，提升为警告
+    unawaited_futures: warning
+
+linter:
+  rules:
+    - always_use_package_imports
+    - avoid_print
+    - directives_ordering
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - prefer_final_locals
+    - prefer_single_quotes
+    - unawaited_futures
+    - use_super_parameters
