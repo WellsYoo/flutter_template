@@ -40,52 +40,66 @@ fvm flutter test
 
 | 组件 | 用途 | 示例 |
 | --- | --- | --- |
-| `AppText` | 统一字号颜色的文本 | `AppText.title('标题')` `.body` `.secondary` `.caption` `AppText.money(1234.5)` |
-| `AppButton` | 按钮；返回 Future 自动 loading、防重复点击、异常 toast | `AppButton.primary('提交', block: true, onPressed: _submit)` `.outline` `.danger` `.text` |
-| `AppCard` | 白底圆角卡片，可点击 | `AppCard(onTap: ..., child: ...)` |
-| `InfoRow` | “标签：值”一行 | `InfoRow('合同编号', no)` |
-| `AppTag` | 状态标签 | `AppTag('待审核', type: TagType.warning)` |
-| `BottomBar` | 页面底部操作栏，处理安全区，按钮等分 | `bottomNavigationBar: BottomBar(children: [...])` |
-| `FormSection` / `FormItem` | 表单分组和表单行 | `FormItem.input` `.select` `.textarea` `.switcher` `.text` `FormItem.radio` |
-| `AppImage` | 图片，统一占位和失败图 | `AppImage.network(url, width: 40, height: 40, radius: 20)` |
-| `SearchField` | 搜索框，自带防抖和清除 | `SearchField(onChanged: ...)` |
-| `PagedListView` | 分页列表（EasyRefresh） | 见下文 |
-| `AsyncValueView` | 异步数据的加载 / 失败 / 刷新 | `AsyncValueView(value: ..., onRefresh: ..., data: ...)` |
-| `AppRefresh` | EasyRefresh 统一样式封装，特殊页面直接用 | `AppRefresh(onRefresh: ..., child: CustomScrollView(...))` |
-| `EmptyView` / `ErrorView` / `LoadingView` | 状态视图 | |
-| `Toast` | 居中轻提示 | `Toast.show('已复制')` `Toast.success('保存成功')` `Toast.error(e)` |
-| `withLoading` | 全屏 loading，跟随 Future 关闭 | `await withLoading(() => repo.save(), message: '提交中')` |
-| `AppDialog` | 确认框 / 提示框 | `await AppDialog.confirm(content: '确定删除？', danger: true)` |
-| `AppSheet` | 底部弹层 | `AppSheet.actions` `.select` `.multiSelect` `.date` `.custom` |
+| `XText` | 统一字号颜色的文本；`size` `color` `bold` `maxLines` `lineThrough` 可单独覆盖 | `XText.title('标题')` `.body` `.secondary` `.caption` `XText('自定义', size: 20, bold: true)` `XText.money(1234.5)` |
+| `XButton` | 按钮；返回 Future 自动 loading、防重复点击、异常 toast；`color` `round` `width` `icon` `confirm`（二次确认） | `XButton.primary('提交', block: true, onPressed: _submit)` `.outline` `.danger` `.text` `XButton.danger('删除', confirm: '确定删除？', onPressed: _delete)` |
+| `XContainer` | 容器：圆角 / 渐变 / 边框 / 阴影 / 圆形 / 点击，不用手写 BoxDecoration | `XContainer(colors: [c1, c2], radius: 8, border: true, shadow: true, onTap: ..., child: ...)` |
+| `XCard` | 白底圆角卡片，可点击；`color` `radius` `border` | `XCard(onTap: ..., child: ...)` |
+| `XCell` | 设置页 / 个人中心的列表行：图标 + 标题 + 值 + 箭头 | `XCell('缓存', icon: Icons.storage, value: '12 MB', onTap: _clear)` |
+| `XInfoRow` | “标签：值”一行 | `XInfoRow('合同编号', no)` |
+| `XTag` | 状态标签；`color` `outlined` `icon` | `XTag('待审核', type: XTagType.warning)` |
+| `XBottomBar` | 页面底部操作栏，处理安全区，按钮等分 | `bottomNavigationBar: XBottomBar(children: [...])` |
+| `XFormSection` / `XFormItem` | 表单分组和表单行；`picker` / `date` 自带弹层；`help` 说明文字；`XFormSection(labelWidth:)` 统一标签宽度 | `XFormItem.input` `.select` `.textarea` `.switcher` `.text` `XFormItem.radio` `XFormItem.picker` `XFormItem.date` |
+| `XImage` | 图片，统一占位和失败图 | `XImage(url, width: 120, height: 80, radius: 8)`、`XImage.avatar(url, size: 40)` |
+| `XSearchField` | 搜索框，自带防抖和清除；`round` 灰底胶囊样式 | `XSearchField(onChanged: ...)` |
+| `XPagedListView` | 分页列表（EasyRefresh） | 见下文 |
+| `XAsyncView` | 异步数据的加载 / 失败 / 空 / 刷新 | `XAsyncView(value: ..., onRefresh: ..., isEmpty: (d) => d.isEmpty, data: ...)` |
+| `XRefresh` | EasyRefresh 统一样式封装，特殊页面直接用 | `XRefresh(onRefresh: ..., child: CustomScrollView(...))` |
+| `XEmptyView` / `XErrorView` / `XLoadingView` | 状态视图；空状态可带插图和按钮 | `XEmptyView(message: '还没有订单', actionText: '去逛逛', onAction: ...)` |
+| `XToast` | 轻提示；默认时长 / 位置改 `XToast.duration` / `XToast.position` | `XToast.show('已复制')` `XToast.success('保存成功')` `XToast.error(e)` |
+| `XLoading` | 全屏 loading，跟随 Future 关闭；也可手动 `show` / `hide` | `await XLoading.run(() => repo.save(), message: '提交中')` |
+| `XDialog` | 确认框 / 提示框 / 输入框 / 自定义 | `await XDialog.confirm(content: '确定删除？', danger: true)` `XDialog.input(title: '修改昵称')` |
+| `XSheet` | 底部弹层 | `XSheet.actions` `.select` `.multiSelect` `.date` `.custom` |
 | `InputFormats` / `Validators` | 输入限制 / 校验 | `InputFormats.decimal(2)` `InputFormats.phone` `Validators.phone(v)` |
 
-样式常量：颜色 `context.appColors.text / textSecondary / textHint / divider / background / card / success / warning / danger`，
+样式常量：颜色 `context.xColors.text / textSecondary / textHint / divider / background / card / success / warning / danger`，
 主色 `context.colors.primary`；字号 `FontSizes`；间距 `Insets`；圆角 `Radii`。
-换品牌色改 `app_theme.dart` 里的 `brandColor`。尺寸单位是逻辑像素，750 设计稿上的 px 除以 2。
+尺寸单位是逻辑像素，750 设计稿上的 px 除以 2。
+
+组件统一用 `X` 前缀（`XButton`、`XText`…），文件名 `x_*.dart`；主题常量 `Insets` / `Radii` / `FontSizes` 不带前缀。
+
+换品牌色、圆角、字体或个别颜色，在 `app/app.dart` 里用 `XTheme.create`：
+
+```dart
+theme: XTheme.create(primary: const Color(0xFF07C160), radius: 4),
+darkTheme: XTheme.create(
+  brightness: Brightness.dark,
+  colors: XColors.dark.copyWith(background: Colors.black),
+),
+```
 
 ### 和旧版 xjj_app_base 组件的对应
 
 | 旧 | 新 |
 | --- | --- |
-| `ScreenText.title / subTitle / content / weak` | `AppText.title / body / secondary / caption` |
-| `context.colorStyle.textBiz / textSubBiz / dividerLine` | `context.appColors.text / textHint / divider` |
+| `ScreenText.title / subTitle / content / weak` | `XText.title / body / secondary / caption` |
+| `context.colorStyle.textBiz / textSubBiz / dividerLine` | `context.xColors.text / textHint / divider` |
 | `context.sizeStyle.hSpacingStandard`、`ScreenSpacer`、`ScreenPadding` | `Insets.lg`、`SizedBox`、`Padding` |
-| `ScreenButton.text / ScreenOutlineButton.text` | `AppButton.primary / AppButton.outline` |
-| `ScreenBottomBar` + `ScreenBottomButton` | `BottomBar` + `AppButton` |
-| `ScreenSettingItem.choose / inputText / inputMultiLine / operateSwitch / radio / view` | `FormItem.select / input / textarea / switcher / radio / text` |
-| `ScreenSettingItem.inputRMB / inputDouble` | `FormItem.input(inputFormatters: [InputFormats.decimal(2)], suffix: '元')` |
-| `ScreenSettingContainer`、`ScreenSettingTitle` | `FormSection(title: ...)` |
-| `ItemTextRow` | `InfoRow` |
-| `ScreenContainer.round`、`ScreenInkWellContainer` | `AppCard` |
-| `ScreenNetImage / ScreenNormalImage` | `AppImage.network / AppImage.asset` |
-| `MyEasyRefresh` | `PagedListView` / `AppRefresh` |
-| `MyNoDataWidget`、`MyErrorWidget` | `EmptyView`、`ErrorView` |
-| `MyToastUtil.showToast / showLoading / showSuccess` | `Toast.show / withLoading / Toast.success` |
-| `MyDialogUtil.showConfirm / showTip` | `AppDialog.confirm / alert` |
-| `MyDrawerUtil.showBottomOption / showBottomRadioList / showBottomWheel` | `AppSheet.actions / select / custom` |
-| 日期选择相关 widget | `AppSheet.date` |
-| `MySearchBar` | `SearchField` |
-| `MyBaseState`、`MyBaseBody`、`MyOriginBody` | `Scaffold` + `AsyncValueView`（加载 / 失败 / 重试由 Riverpod 状态驱动） |
+| `ScreenButton.text / ScreenOutlineButton.text` | `XButton.primary / XButton.outline` |
+| `ScreenBottomBar` + `ScreenBottomButton` | `XBottomBar` + `XButton` |
+| `ScreenSettingItem.choose / inputText / inputMultiLine / operateSwitch / radio / view` | `XFormItem.select / input / textarea / switcher / radio / text` |
+| `ScreenSettingItem.inputRMB / inputDouble` | `XFormItem.input(inputFormatters: [InputFormats.decimal(2)], suffix: '元')` |
+| `ScreenSettingContainer`、`ScreenSettingTitle` | `XFormSection(title: ...)` |
+| `ItemTextRow` | `XInfoRow` |
+| `ScreenContainer.round`、`ScreenInkWellContainer` | `XCard` |
+| `ScreenNetImage / ScreenNormalImage` | `XImage`（网络图和 asset 同一个入口） |
+| `MyEasyRefresh` | `XPagedListView` / `XRefresh` |
+| `MyNoDataWidget`、`MyErrorWidget` | `XEmptyView`、`XErrorView` |
+| `MyToastUtil.showToast / showLoading / showSuccess` | `XToast.show / XLoading.run / XToast.success` |
+| `MyDialogUtil.showConfirm / showTip` | `XDialog.confirm / alert` |
+| `MyDrawerUtil.showBottomOption / showBottomRadioList / showBottomWheel` | `XSheet.actions / select / custom` |
+| 日期选择相关 widget | `XSheet.date` |
+| `MySearchBar` | `XSearchField` |
+| `MyBaseState`、`MyBaseBody`、`MyOriginBody` | `Scaffold` + `XAsyncView`（加载 / 失败 / 重试由 Riverpod 状态驱动） |
 
 没有迁移的：日历、步进器、锚点、气泡菜单、截图分享、图片预览、WebView、视频、微信。
 这些依赖重或使用面窄，项目用到时再加，可以参考 `.legacy-backup/`（本地备份，不入库）或 git 历史。
@@ -96,12 +110,12 @@ fvm flutter test
 
 | 场景 | 用什么 | 参考代码 |
 | --- | --- | --- |
-| 分页列表（下拉刷新 + 上拉加载 + 空状态 + 错误重试） | `PagedNotifier` + `PagedListView` | `features/article/article_providers.dart` |
-| 带搜索 / 筛选的列表 | `AsyncNotifierProvider.family`，条件作为参数 + `SearchField` | `features/article/presentation/article_list_page.dart` |
-| 详情页（加载 / 失败重试 / 下拉刷新 / 底部按钮） | `FutureProvider.family` + `AsyncValueView(onRefresh:)` + `BottomBar` | `features/article/presentation/article_detail_page.dart` |
-| 表单（输入 / 选择 / 日期 / 校验 / 提交） | `FormSection` + `FormItem` + `AppSheet` + `withLoading` | `features/demo/form_demo_page.dart` |
-| 登录类表单（按钮 loading） | `Form` + `AppButton`（onPressed 返回 Future） | `features/auth/presentation/login_page.dart` |
-| 二次确认 | `AppDialog.confirm` | `features/profile/profile_page.dart` |
+| 分页列表（下拉刷新 + 上拉加载 + 空状态 + 错误重试） | `PagedNotifier` + `XPagedListView` | `features/article/article_providers.dart` |
+| 带搜索 / 筛选的列表 | `AsyncNotifierProvider.family`，条件作为参数 + `XSearchField` | `features/article/presentation/article_list_page.dart` |
+| 详情页（加载 / 失败重试 / 下拉刷新 / 底部按钮） | `FutureProvider.family` + `XAsyncView(onRefresh:)` + `XBottomBar` | `features/article/presentation/article_detail_page.dart` |
+| 表单（输入 / 选择 / 日期 / 校验 / 提交） | `XFormSection` + `XFormItem` + `XSheet` + `XLoading` | `features/demo/form_demo_page.dart` |
+| 登录类表单（按钮 loading） | `Form` + `XButton`（onPressed 返回 Future） | `features/auth/presentation/login_page.dart` |
+| 二次确认 | `XButton(confirm:)` 或 `XDialog.confirm` | `features/profile/profile_page.dart` |
 
 列表各状态的表现：
 
@@ -109,7 +123,7 @@ fvm flutter test
 | --- | --- |
 | 首屏加载中 | 居中 loading |
 | 首屏失败 | 错误文案 + “重试”按钮 |
-| 空数据 | `EmptyView`（可自定义文案），仍可下拉刷新 |
+| 空数据 | `XEmptyView`（可自定义文案），仍可下拉刷新 |
 | 下拉刷新失败 | 保留旧数据，toast 提示 |
 | 上拉加载失败 | toast 提示，footer 显示“加载失败，上拉重试” |
 | 没有更多 | 关闭上拉，列表底部显示“没有更多了” |
@@ -166,18 +180,18 @@ lib/
    | 跨页面共享、有交互的状态 | `Notifier` / `AsyncNotifier` |
    | 只在一个页面里用的临时状态（表单字段） | `StatefulWidget` 的 `setState` 即可 |
 
-4. **页面**：`ConsumerWidget` + `ref.watch`，异步数据用 `AsyncValueView` 或 `PagedListView`。
+4. **页面**：`ConsumerWidget` + `ref.watch`，异步数据用 `XAsyncView` 或 `XPagedListView`。
 5. **路由**：在 `app/routes.dart` 加路径，在 `app/router.dart` 加 `GoRoute`。
 
 ## 约定
 
 - **网络**：只通过 `ApiClient` 调接口。它负责拆 `{code, msg, data}`、把所有错误转成 `ApiException`、
   遇到 401 自动登出。后端字段名或成功码不同，改 `ApiEnvelope`。
-- **错误提示**：`Toast.error(e)` 或 `errorMessageOf(e)`，不要自己拼错误文案。
-- **按钮 loading**：`AppButton` 的 `onPressed` 返回 Future 就会转圈。只有“等接口”才返回 Future；
+- **错误提示**：`XToast.error(e)` 或 `errorMessageOf(e)`，不要自己拼错误文案。
+- **按钮 loading**：`XButton` 的 `onPressed` 返回 Future 就会转圈。只有“等接口”才返回 Future；
   弹确认框这类等用户操作的，写成 `() => unawaited(_confirm())`。
 - **跳转**：`context.push(Routes.xxx)`，不手写路径字符串。登录态变化不需要手动跳转，路由守卫会处理。
-- **样式**：用 `AppText`、`context.appColors`、`Insets`、`Radii`，不写裸色值和数字。
+- **样式**：用 `XText`、`context.xColors`、`Insets`、`Radii`，不写裸色值和数字。
 - **本地存储**：key 统一加到 `StorageKeys`。
 - **测试**：Repository 都有接口，测试里用 `overrideWithValue` 换成假实现，见 `test/`。
 
@@ -206,7 +220,7 @@ fvm flutter build apk --release --dart-define-from-file=env/prod.json
 
 - **代码生成**（freezed / json_serializable / riverpod_generator）：模型多、字段复杂时再引入。
 - **屏幕适配**（flutter_screenutil）：优先用弹性布局；设计稿必须等比还原时再加。
-- **网络图片磁盘缓存**（cached_network_image）：只需改 `AppImage` 一个文件。
+- **网络图片磁盘缓存**（cached_network_image）：只需改 `XImage` 一个文件。
 - **图片选择**、**WebView**、**视频**、**微信 SDK** 等：项目用到时再加。
 - **安全存储**：token 目前存在 SharedPreferences。安全要求高时把 `PrefsStorage` 换成 flutter_secure_storage 实现，接口不变。
 - **国际化**：已接入 Flutter 自带的中文组件文案。需要多语言时启用 `flutter gen-l10n`。

@@ -1,29 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:xjj_app_base/core/theme/app_theme.dart';
+import 'package:xjj_app_base/core/theme/x_theme.dart';
 import 'package:xjj_app_base/core/utils/context_ext.dart';
+import 'package:xjj_app_base/core/utils/formatters.dart';
+import 'package:xjj_app_base/shared/ui/x_sheet.dart';
 
-/// 表单分组：白底卡片，内部 [FormItem] 之间自动加分割线。
+/// 表单分组：白底卡片，内部 [XFormItem] / XCell 之间自动加分割线。
 ///
 /// ```dart
-/// FormSection(
+/// XFormSection(
 ///   title: '基本信息',
+///   labelWidth: 96, // 这一组的标签统一宽度，输入框左对齐时好看
 ///   children: [
-///     FormItem.input(label: '姓名', required: true, onChanged: (v) => name = v),
-///     FormItem.select(label: '类型', value: type?.label, onTap: _pickType),
+///     XFormItem.input(label: '姓名', required: true, onChanged: (v) => name = v),
+///     XFormItem.select(label: '类型', value: type?.label, onTap: _pickType),
 ///   ],
 /// )
 /// ```
-class FormSection extends StatelessWidget {
-  const FormSection({super.key, required this.children, this.title, this.margin});
+class XFormSection extends StatelessWidget {
+  const XFormSection({
+    super.key,
+    required this.children,
+    this.title,
+    this.margin,
+    this.labelWidth,
+    this.divider = true,
+  });
 
   final List<Widget> children;
   final String? title;
   final EdgeInsetsGeometry? margin;
 
+  /// 组内所有 [XFormItem] 的标签宽度；不传时按内容自适应（88 ~ 140）
+  final double? labelWidth;
+
+  /// 行之间是否显示分割线
+  final bool divider;
+
   @override
   Widget build(BuildContext context) {
-    final c = context.appColors;
+    final c = context.xColors;
     return Padding(
       padding: margin ?? const EdgeInsets.only(top: Insets.md),
       child: Column(
@@ -39,13 +55,16 @@ class FormSection extends StatelessWidget {
             ),
           ColoredBox(
             color: c.card,
-            child: Column(
-              children: [
-                for (var i = 0; i < children.length; i++) ...[
-                  if (i > 0) const Divider(indent: Insets.lg),
-                  children[i],
+            child: _FormScope(
+              labelWidth: labelWidth,
+              child: Column(
+                children: [
+                  for (var i = 0; i < children.length; i++) ...[
+                    if (i > 0 && divider) const Divider(indent: Insets.lg),
+                    children[i],
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ],
@@ -54,13 +73,23 @@ class FormSection extends StatelessWidget {
   }
 }
 
+class _FormScope extends InheritedWidget {
+  const _FormScope({required this.labelWidth, required super.child});
+
+  final double? labelWidth;
+
+  @override
+  bool updateShouldNotify(_FormScope old) => labelWidth != old.labelWidth;
+}
+
 /// 表单行：左边标签，右边内容。覆盖“展示 / 选择 / 输入 / 多行 / 开关 / 单选”几种常见形态，
 /// 都不满足时用默认构造传 [child]。
-class FormItem extends StatelessWidget {
+class XFormItem extends StatelessWidget {
   /// 自定义右侧内容
-  const FormItem({
+  const XFormItem({
     super.key,
     required this.label,
+    this.help,
     required this.child,
     this.required = false,
     this.onTap,
@@ -69,9 +98,10 @@ class FormItem extends StatelessWidget {
   }) : _builder = null;
 
   /// 只读展示
-  FormItem.text({
+  XFormItem.text({
     super.key,
     required this.label,
+    this.help,
     required String? value,
     this.onTap,
     this.arrow = false,
@@ -80,10 +110,11 @@ class FormItem extends StatelessWidget {
        child = null,
        _builder = ((context) => _ValueText(value, placeholder: '--'));
 
-  /// 点击选择（弹出 AppSheet 等），右侧显示箭头
-  FormItem.select({
+  /// 点击选择（弹出 XSheet 等），右侧显示箭头
+  XFormItem.select({
     super.key,
     required this.label,
+    this.help,
     required String? value,
     required this.onTap,
     String hint = '请选择',
@@ -94,9 +125,10 @@ class FormItem extends StatelessWidget {
        _builder = ((context) => _ValueText(value, placeholder: hint));
 
   /// 单行输入。不传 [controller] 时用 [initialValue] + [onChanged]。
-  FormItem.input({
+  XFormItem.input({
     super.key,
     required this.label,
+    this.help,
     TextEditingController? controller,
     String? initialValue,
     ValueChanged<String>? onChanged,
@@ -107,7 +139,15 @@ class FormItem extends StatelessWidget {
     int? maxLength,
     bool obscureText = false,
     bool enabled = true,
+    bool readOnly = false,
+    TextAlign textAlign = TextAlign.end,
+    TextInputAction? textInputAction,
+
+    /// 输入框后面的单位文字，如 “元”
     String? suffix,
+
+    /// 输入框后面的组件，如“获取验证码”按钮
+    Widget? trailing,
   }) : onTap = null,
        arrow = false,
        vertical = false,
@@ -121,15 +161,29 @@ class FormItem extends StatelessWidget {
          keyboardType: keyboardType,
          inputFormatters: inputFormatters,
          maxLength: maxLength,
-         textAlign: TextAlign.end,
-         style: TextStyle(fontSize: FontSizes.body, color: context.appColors.text),
-         decoration: _bareDecoration.copyWith(hintText: hint, suffixText: suffix, counterText: ''),
+         readOnly: readOnly,
+         textAlign: textAlign,
+         textInputAction: textInputAction,
+         style: TextStyle(fontSize: FontSizes.body, color: context.xColors.text),
+         decoration: _bareDecoration.copyWith(
+           hintText: hint,
+           suffixText: suffix,
+           counterText: '',
+           suffixIcon: trailing == null
+               ? null
+               : Padding(
+                   padding: const EdgeInsets.only(left: Insets.sm),
+                   child: trailing,
+                 ),
+           suffixIconConstraints: const BoxConstraints(),
+         ),
        ));
 
   /// 多行输入，标签在上
-  FormItem.textarea({
+  XFormItem.textarea({
     super.key,
     required this.label,
+    this.help,
     TextEditingController? controller,
     String? initialValue,
     ValueChanged<String>? onChanged,
@@ -148,14 +202,15 @@ class FormItem extends StatelessWidget {
          minLines: minLines,
          maxLines: null,
          maxLength: maxLength,
-         style: TextStyle(fontSize: FontSizes.body, color: context.appColors.text),
+         style: TextStyle(fontSize: FontSizes.body, color: context.xColors.text),
          decoration: _bareDecoration.copyWith(hintText: hint),
        ));
 
   /// 开关
-  FormItem.switcher({
+  XFormItem.switcher({
     super.key,
     required this.label,
+    this.help,
     required bool value,
     required ValueChanged<bool>? onChanged,
   }) : required = false,
@@ -173,6 +228,9 @@ class FormItem extends StatelessWidget {
        ));
 
   final String label;
+
+  /// 显示在这一行下方的灰色说明文字
+  final String? help;
   final bool required;
   final VoidCallback? onTap;
   final bool arrow;
@@ -182,7 +240,7 @@ class FormItem extends StatelessWidget {
   final Widget? child;
   final WidgetBuilder? _builder;
 
-  /// 单选（选项少时用，选项多用 [FormItem.select] + AppSheet.select）
+  /// 单选（选项少时用，选项多用 [XFormItem.select] + XSheet.select）
   static Widget radio<T>({
     Key? key,
     required String label,
@@ -190,11 +248,13 @@ class FormItem extends StatelessWidget {
     required T? value,
     required ValueChanged<T> onChanged,
     String Function(T)? labelOf,
+    String? help,
     bool required = false,
   }) {
-    return FormItem(
+    return XFormItem(
       key: key,
       label: label,
+      help: help,
       required: required,
       child: _RadioGroup<T>(
         options: options,
@@ -202,6 +262,73 @@ class FormItem extends StatelessWidget {
         onChanged: onChanged,
         labelOf: labelOf ?? (v) => '$v',
       ),
+    );
+  }
+
+  /// 日期选择：点击弹出日期选择器，选完回调 [onChanged]。
+  static Widget date({
+    Key? key,
+    required String label,
+    required DateTime? value,
+    required ValueChanged<DateTime> onChanged,
+    DateTime? min,
+    DateTime? max,
+
+    /// 同时选择时间（年月日 时分）
+    bool withTime = false,
+    String hint = '请选择',
+    String? help,
+    bool required = false,
+  }) {
+    return XFormItem.select(
+      key: key,
+      label: label,
+      help: help,
+      hint: hint,
+      required: required,
+      value: value == null ? null : (withTime ? Fmt.dateTime(value) : Fmt.date(value)),
+      onTap: () async {
+        final picked = await XSheet.date(
+          title: label,
+          initial: value,
+          min: min,
+          max: max,
+          withTime: withTime,
+        );
+        if (picked != null) onChanged(picked);
+      },
+    );
+  }
+
+  /// 下拉单选：点击弹出选项列表，选完回调 [onChanged]。
+  static Widget picker<T>({
+    Key? key,
+    required String label,
+    required List<T> options,
+    required T? value,
+    required ValueChanged<T> onChanged,
+    String Function(T)? labelOf,
+    String hint = '请选择',
+    String? help,
+    bool required = false,
+  }) {
+    final text = labelOf ?? (v) => '$v';
+    return XFormItem.select(
+      key: key,
+      label: label,
+      help: help,
+      hint: hint,
+      required: required,
+      value: value == null ? null : text(value),
+      onTap: () async {
+        final picked = await XSheet.select(
+          title: label,
+          options: options,
+          selected: value,
+          labelOf: labelOf,
+        );
+        if (picked != null) onChanged(picked);
+      },
     );
   }
 
@@ -220,7 +347,9 @@ class FormItem extends StatelessWidget {
     final content = child ?? _builder!(context);
     final labelWidget = _Label(label, required: required);
 
-    final Widget body = vertical
+    final labelWidth = context.dependOnInheritedWidgetOfExactType<_FormScope>()?.labelWidth;
+
+    Widget body = vertical
         ? Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -231,18 +360,36 @@ class FormItem extends StatelessWidget {
           )
         : Row(
             children: [
-              ConstrainedBox(
-                constraints: const BoxConstraints(minWidth: 88, maxWidth: 140),
-                child: labelWidget,
-              ),
+              if (labelWidth != null)
+                SizedBox(width: labelWidth, child: labelWidget)
+              else
+                ConstrainedBox(
+                  constraints: const BoxConstraints(minWidth: 88, maxWidth: 140),
+                  child: labelWidget,
+                ),
               const SizedBox(width: Insets.md),
               Expanded(child: content),
               if (arrow) ...[
                 const SizedBox(width: Insets.xs),
-                Icon(Icons.chevron_right, size: 20, color: context.appColors.textHint),
+                Icon(Icons.chevron_right, size: 20, color: context.xColors.textHint),
               ],
             ],
           );
+
+    if (help != null) {
+      body = Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          body,
+          const SizedBox(height: Insets.xs),
+          Text(
+            help!,
+            style: TextStyle(fontSize: FontSizes.caption, color: context.xColors.textHint),
+          ),
+        ],
+      );
+    }
 
     return InkWell(
       onTap: onTap == null
@@ -270,7 +417,7 @@ class _Label extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = context.appColors;
+    final c = context.xColors;
     return Text.rich(
       TextSpan(
         children: [
@@ -295,7 +442,7 @@ class _ValueText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = context.appColors;
+    final c = context.xColors;
     final empty = value == null || value!.isEmpty;
     return Text(
       empty ? placeholder : value!,
@@ -321,7 +468,7 @@ class _RadioGroup<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = context.colors.primary;
-    final c = context.appColors;
+    final c = context.xColors;
     return Wrap(
       alignment: WrapAlignment.end,
       spacing: Insets.sm,

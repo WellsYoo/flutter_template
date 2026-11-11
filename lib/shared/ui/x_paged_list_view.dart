@@ -1,29 +1,29 @@
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:xjj_app_base/core/theme/app_theme.dart';
+import 'package:xjj_app_base/core/theme/x_theme.dart';
 import 'package:xjj_app_base/core/utils/context_ext.dart';
 import 'package:xjj_app_base/shared/pagination.dart';
-import 'package:xjj_app_base/shared/ui/app_refresh.dart';
-import 'package:xjj_app_base/shared/ui/feedback.dart';
-import 'package:xjj_app_base/shared/ui/status_views.dart';
+import 'package:xjj_app_base/shared/ui/x_feedback.dart';
+import 'package:xjj_app_base/shared/ui/x_refresh.dart';
+import 'package:xjj_app_base/shared/ui/x_status_views.dart';
 
 /// 分页列表：下拉刷新 + 上拉加载（EasyRefresh）+ 空 / 错 / 加载中状态，配合 [PagedNotifier]。
 ///
 /// ```dart
-/// PagedListView(
+/// XPagedListView(
 ///   provider: articleListProvider(keyword),
 ///   itemBuilder: (context, article, index) => ArticleTile(article),
 /// )
 /// ```
-class PagedListView<N extends PagedNotifier<T>, T> extends ConsumerWidget {
-  const PagedListView({
+class XPagedListView<N extends PagedNotifier<T>, T> extends ConsumerWidget {
+  const XPagedListView({
     super.key,
     required this.provider,
     required this.itemBuilder,
     this.separator = const SizedBox(height: Insets.md),
     this.padding = const EdgeInsets.all(Insets.lg),
-    this.empty = const EmptyView(),
+    this.empty = const XEmptyView(),
     this.header,
   });
 
@@ -43,15 +43,15 @@ class PagedListView<N extends PagedNotifier<T>, T> extends ConsumerWidget {
     return ref
         .watch(provider)
         .when(
-          loading: () => const LoadingView(),
-          error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(provider)),
-          data: (state) => AppRefresh(
+          loading: () => const XLoadingView(),
+          error: (e, _) => XErrorView(error: e, onRetry: () => ref.invalidate(provider)),
+          data: (state) => XRefresh(
             onRefresh: () async {
               try {
                 await notifier.refresh();
                 return IndicatorResult.success;
               } catch (e) {
-                Toast.error(e);
+                XToast.error(e);
                 return IndicatorResult.fail;
               }
             },
@@ -63,7 +63,7 @@ class PagedListView<N extends PagedNotifier<T>, T> extends ConsumerWidget {
                         return IndicatorResult.success;
                       case LoadMoreResult.failed:
                         final error = ref.read(provider).value?.loadMoreError;
-                        if (error != null) Toast.error(error);
+                        if (error != null) XToast.error(error);
                         return IndicatorResult.fail;
                       case LoadMoreResult.skipped:
                         return IndicatorResult.none;
@@ -117,7 +117,7 @@ class _NoMore extends StatelessWidget {
       child: Center(
         child: Text(
           '没有更多了',
-          style: TextStyle(fontSize: FontSizes.caption, color: context.appColors.textHint),
+          style: TextStyle(fontSize: FontSizes.caption, color: context.xColors.textHint),
         ),
       ),
     );

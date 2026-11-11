@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xjj_app_base/app/router.dart';
-import 'package:xjj_app_base/core/theme/app_theme.dart';
 import 'package:xjj_app_base/core/theme/theme_mode.dart';
+import 'package:xjj_app_base/core/theme/x_theme.dart';
 
 class App extends ConsumerWidget {
   const App({super.key});
@@ -14,8 +14,8 @@ class App extends ConsumerWidget {
       title: 'App',
       debugShowCheckedModeBanner: false,
       routerConfig: ref.watch(routerProvider),
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
+      theme: XTheme.light,
+      darkTheme: XTheme.dark,
       themeMode: ref.watch(themeModeProvider),
       locale: const Locale('zh', 'CN'),
       supportedLocales: const [Locale('zh', 'CN'), Locale('en')],

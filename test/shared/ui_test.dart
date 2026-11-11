@@ -10,20 +10,20 @@ Future<void> _pump(WidgetTester tester, Widget child) async {
   await tester.pumpWidget(
     MaterialApp(
       navigatorKey: rootNavigatorKey,
-      theme: AppTheme.light,
+      theme: XTheme.light,
       home: Scaffold(body: child),
     ),
   );
 }
 
 void main() {
-  group('AppButton', () {
+  group('XButton', () {
     testWidgets('返回 Future 时显示 loading，期间重复点击无效', (tester) async {
       final done = Completer<void>();
       var calls = 0;
       await _pump(
         tester,
-        AppButton.primary(
+        XButton.primary(
           '提交',
           onPressed: () {
             calls++;
@@ -47,7 +47,7 @@ void main() {
     testWidgets('异常自动 toast，并恢复可点击', (tester) async {
       await _pump(
         tester,
-        AppButton.primary(
+        XButton.primary(
           '提交',
           onPressed: () async => throw const ApiException(ApiErrorType.business, '余额不足'),
         ),
@@ -61,19 +61,218 @@ void main() {
     });
 
     testWidgets('onPressed 为 null 时禁用', (tester) async {
-      await _pump(tester, const AppButton.primary('提交', onPressed: null));
+      await _pump(tester, const XButton.primary('提交', onPressed: null));
       expect(tester.widget<FilledButton>(find.byType(FilledButton)).onPressed, isNull);
+    });
+
+    testWidgets('confirm：确认后才执行，取消不执行', (tester) async {
+      var calls = 0;
+      await _pump(tester, XButton.danger('删除', confirm: '确定删除吗？', onPressed: () => calls++));
+
+      await tester.tap(find.text('删除'));
+      await tester.pumpAndSettle();
+      expect(find.text('确定删除吗？'), findsOneWidget);
+      await tester.tap(find.text('取消'));
+      await tester.pumpAndSettle();
+      expect(calls, 0);
+
+      await tester.tap(find.text('删除'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('确定'));
+      await tester.pumpAndSettle();
+      expect(calls, 1);
+    });
+
+    testWidgets('loading 由外部控制时显示转圈且不可点击', (tester) async {
+      var calls = 0;
+      await _pump(tester, XButton.primary('提交', loading: true, onPressed: () => calls++));
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      await tester.tap(find.byType(FilledButton));
+      expect(calls, 0);
+    });
+
+    testWidgets('color / round / width 生效', (tester) async {
+      await _pump(
+        tester,
+        Center(
+          child: XButton.primary(
+            '领取',
+            color: Colors.orange,
+            round: true,
+            width: 200,
+            onPressed: () {},
+          ),
+        ),
+      );
+      final material = tester.widget<Material>(
+        find.descendant(of: find.byType(FilledButton), matching: find.byType(Material)),
+      );
+      expect(material.color, Colors.orange);
+      expect(material.shape, isA<StadiumBorder>());
+      expect(tester.getSize(find.byType(FilledButton)).width, 200);
     });
   });
 
-  group('FormItem', () {
+  testWidgets('XText：size / bold / lineThrough 覆盖默认样式', (tester) async {
+    await _pump(tester, const XText.caption('原价', size: 20, bold: true, lineThrough: true));
+    final style = tester.widget<Text>(find.text('原价')).style!;
+    expect(style.fontSize, 20);
+    expect(style.fontWeight, FontWeight.w600);
+    expect(style.decoration, TextDecoration.lineThrough);
+  });
+
+  group('XContainer', () {
+    BoxDecoration decoration(WidgetTester tester) =>
+        tester.widget<Container>(find.byType(Container)).decoration! as BoxDecoration;
+
+    testWidgets('圆角 / 渐变 / 边框 / 阴影', (tester) async {
+      await _pump(
+        tester,
+        const Center(
+          child: XContainer(
+            size: 80,
+            radius: 12,
+            colors: [Colors.red, Colors.blue],
+            borderColor: Colors.green,
+            borderWidth: 2,
+            shadow: true,
+          ),
+        ),
+      );
+      final d = decoration(tester);
+      expect(d.borderRadius, BorderRadius.circular(12));
+      expect((d.gradient! as LinearGradient).colors, [Colors.red, Colors.blue]);
+      expect(d.border, Border.all(color: Colors.green, width: 2));
+      expect(d.boxShadow, isNotEmpty);
+      expect(tester.getSize(find.byType(XContainer)), const Size(80, 80));
+    });
+
+    testWidgets('border: true 用主题边框色；circle 为圆形；borderRadius 优先于 radius', (tester) async {
+      await _pump(tester, const Center(child: XContainer(size: 40, circle: true, border: true)));
+      var d = decoration(tester);
+      expect(d.shape, BoxShape.circle);
+      expect(d.border!.top.color, XColors.light.border);
+
+      const top = BorderRadius.vertical(top: Radius.circular(16));
+      await _pump(tester, const Center(child: XContainer(size: 40, radius: 4, borderRadius: top)));
+      d = decoration(tester);
+      expect(d.borderRadius, top);
+    });
+
+    testWidgets('onTap：内边距区域也能点击', (tester) async {
+      var taps = 0;
+      await _pump(
+        tester,
+        Center(
+          child: XContainer(
+            padding: const EdgeInsets.all(40),
+            color: Colors.white,
+            onTap: () => taps++,
+            child: const Text('点我'),
+          ),
+        ),
+      );
+      final box = tester.getRect(find.byType(XContainer));
+      await tester.tapAt(box.topLeft + const Offset(5, 5));
+      expect(taps, 1);
+    });
+  });
+
+  testWidgets('XCell：显示值，可点击时带箭头', (tester) async {
+    var tapped = false;
+    await _pump(
+      tester,
+      Column(
+        children: [
+          XCell('缓存', value: '12 MB', onTap: () => tapped = true),
+          const XCell('版本', value: '1.0.0'),
+        ],
+      ),
+    );
+    expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+    await tester.tap(find.text('缓存'));
+    expect(tapped, isTrue);
+  });
+
+  testWidgets('XTheme.create：品牌色和圆角可配置', (tester) async {
+    final theme = XTheme.create(primary: Colors.green, radius: 2);
+    expect(theme.colorScheme.primary, Colors.green);
+    expect(
+      (theme.cardTheme.shape! as RoundedRectangleBorder).borderRadius,
+      BorderRadius.circular(2),
+    );
+    expect(XTheme.create(brightness: Brightness.dark).extension<XColors>(), XColors.dark);
+  });
+
+  testWidgets('XDialog.input：校验不通过不关闭，通过后返回输入内容', (tester) async {
+    await _pump(tester, const SizedBox());
+    final result = XDialog.input(title: '昵称', validator: (v) => v.isEmpty ? '不能为空' : null);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('确定'));
+    await tester.pumpAndSettle();
+    expect(find.text('不能为空'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), ' 张三 ');
+    await tester.tap(find.text('确定'));
+    await tester.pumpAndSettle();
+    expect(await result, '张三');
+    await tester.pump(const Duration(seconds: 1)); // 等延迟释放
+  });
+
+  testWidgets('XLoading：run 结束后自动关闭', (tester) async {
+    await _pump(tester, const SizedBox());
+    final done = Completer<void>();
+    final task = XLoading.run(() => done.future, message: '提交中');
+    await tester.pump();
+    expect(find.text('提交中'), findsOneWidget);
+    expect(XLoading.isShowing, isTrue);
+
+    done.complete();
+    await task;
+    await tester.pump();
+    expect(find.text('提交中'), findsNothing);
+    expect(XLoading.isShowing, isFalse);
+  });
+
+  group('XFormItem', () {
+    testWidgets('picker：点击弹出选项，选完回调', (tester) async {
+      String? value;
+      await _pump(
+        tester,
+        XFormItem.picker(
+          label: '城市',
+          options: const ['北京', '上海'],
+          value: value,
+          onChanged: (v) => value = v,
+        ),
+      );
+      await tester.tap(find.text('请选择'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('上海'));
+      await tester.pumpAndSettle();
+      expect(value, '上海');
+    });
+
+    testWidgets('help 显示说明文字，XFormSection.labelWidth 统一标签宽度', (tester) async {
+      await _pump(
+        tester,
+        XFormSection(
+          labelWidth: 100,
+          children: [XFormItem.input(label: '金额', help: '最多两位小数')],
+        ),
+      );
+      expect(find.text('最多两位小数'), findsOneWidget);
+      expect(tester.getSize(find.text('金额', findRichText: true)).width, 100);
+    });
+
     testWidgets('select：空值显示 hint，必填显示星号，点击回调', (tester) async {
       var tapped = false;
       await _pump(
         tester,
-        FormSection(
+        XFormSection(
           children: [
-            FormItem.select(label: '类型', value: null, required: true, onTap: () => tapped = true),
+            XFormItem.select(label: '类型', value: null, required: true, onTap: () => tapped = true),
           ],
         ),
       );
@@ -85,7 +284,7 @@ void main() {
 
     testWidgets('input：输入回调 onChanged', (tester) async {
       String? value;
-      await _pump(tester, FormItem.input(label: '姓名', onChanged: (v) => value = v));
+      await _pump(tester, XFormItem.input(label: '姓名', onChanged: (v) => value = v));
       await tester.enterText(find.byType(TextField), '张三');
       expect(value, '张三');
     });
@@ -95,7 +294,7 @@ void main() {
       await _pump(
         tester,
         StatefulBuilder(
-          builder: (context, setState) => FormItem.radio(
+          builder: (context, setState) => XFormItem.radio(
             label: '选项',
             options: const ['A', 'B'],
             value: value,
@@ -129,16 +328,16 @@ void main() {
     });
   });
 
-  testWidgets('AppSheet.select 返回所选项，取消返回 null', (tester) async {
+  testWidgets('XSheet.select 返回所选项，取消返回 null', (tester) async {
     await _pump(tester, const SizedBox());
 
-    final first = AppSheet.select(options: ['北京', '上海'], title: '城市');
+    final first = XSheet.select(options: ['北京', '上海'], title: '城市');
     await tester.pumpAndSettle();
     await tester.tap(find.text('上海'));
     await tester.pumpAndSettle();
     expect(await first, '上海');
 
-    final second = AppSheet.select(options: ['北京', '上海'], title: '城市');
+    final second = XSheet.select(options: ['北京', '上海'], title: '城市');
     await tester.pumpAndSettle();
     await tester.tap(find.text('取消'));
     await tester.pumpAndSettle();

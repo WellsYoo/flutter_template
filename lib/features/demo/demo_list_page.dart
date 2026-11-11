@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xjj_app_base/core/network/api_exception.dart';
-import 'package:xjj_app_base/core/theme/app_theme.dart';
+import 'package:xjj_app_base/core/theme/x_theme.dart';
 import 'package:xjj_app_base/shared/pagination.dart';
-import 'package:xjj_app_base/shared/ui/paged_list_view.dart';
+import 'package:xjj_app_base/shared/ui/x_paged_list_view.dart';
 
-/// 列表的各种状态场景，用来演示和手动验证 PagedListView 的表现。
+/// 列表的各种状态场景，用来演示和手动验证 XPagedListView 的表现。
 enum ListScenario {
   normal('正常分页', '共 35 条，下拉刷新，上拉加载更多'),
   empty('空数据', '首屏返回 0 条，下拉刷新后有数据'),
@@ -69,7 +69,7 @@ class DemoListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(scenario.title)),
-      body: PagedListView(
+      body: XPagedListView(
         provider: demoListProvider(scenario),
         padding: EdgeInsets.zero,
         separator: const Divider(indent: Insets.lg),

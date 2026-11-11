@@ -1,20 +1,29 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:xjj_app_base/core/theme/app_theme.dart';
+import 'package:xjj_app_base/core/theme/x_theme.dart';
 import 'package:xjj_app_base/core/utils/context_ext.dart';
-import 'package:xjj_app_base/shared/ui/feedback.dart';
+import 'package:xjj_app_base/shared/ui/x_feedback.dart';
 
 /// 底部弹层。全部返回 Future，用户取消时结果为 null。
 ///
 /// ```dart
-/// final i = await AppSheet.actions(['拍照', '从相册选择']);
-/// final type = await AppSheet.select(title: '选择类型', options: OrderType.values,
+/// final i = await XSheet.actions(['拍照', '从相册选择']);
+/// final type = await XSheet.select(title: '选择类型', options: OrderType.values,
 ///     labelOf: (t) => t.label, selected: current);
-/// final date = await AppSheet.date(title: '开始日期', initial: start);
+/// final date = await XSheet.date(title: '开始日期', initial: start);
+/// final time = await XSheet.date(title: '预约时间', withTime: true);
+/// final i = await XSheet.actions(['编辑', '删除'], danger: 1); // 第 2 项标红
 /// ```
-abstract final class AppSheet {
+abstract final class XSheet {
   /// 操作菜单，返回点击的下标
-  static Future<int?> actions(List<String> actions, {String? title}) {
+  static Future<int?> actions(
+    List<String> actions, {
+    String? title,
+
+    /// 标红的那一项的下标（删除等危险操作）
+    int? danger,
+    String cancelText = '取消',
+  }) {
     return _show<int>(
       (context) => Column(
         mainAxisSize: MainAxisSize.min,
@@ -22,14 +31,18 @@ abstract final class AppSheet {
           if (title != null)
             Padding(
               padding: const EdgeInsets.all(Insets.md),
-              child: Text(title, style: TextStyle(color: context.appColors.textHint)),
+              child: Text(title, style: TextStyle(color: context.xColors.textHint)),
             ),
           for (var i = 0; i < actions.length; i++) ...[
             if (i > 0 || title != null) const Divider(),
-            _SheetRow(text: actions[i], onTap: () => Navigator.pop(context, i)),
+            _SheetRow(
+              text: actions[i],
+              color: i == danger ? context.xColors.danger : null,
+              onTap: () => Navigator.pop(context, i),
+            ),
           ],
-          Container(height: Insets.sm, color: context.appColors.background),
-          _SheetRow(text: '取消', onTap: () => Navigator.pop(context)),
+          Container(height: Insets.sm, color: context.xColors.background),
+          _SheetRow(text: cancelText, onTap: () => Navigator.pop(context)),
         ],
       ),
     );
@@ -91,7 +104,12 @@ abstract final class AppSheet {
     DateTime? initial,
     DateTime? min,
     DateTime? max,
-    CupertinoDatePickerMode mode = CupertinoDatePickerMode.date,
+
+    /// 同时选择时间（年月日 时分）
+    bool withTime = false,
+
+    /// 需要只选时间等其他模式时传，传了就不看 [withTime]
+    CupertinoDatePickerMode? mode,
   }) {
     var value = initial ?? DateTime.now();
     return _show<DateTime>(
@@ -106,7 +124,9 @@ abstract final class AppSheet {
           SizedBox(
             height: 220,
             child: CupertinoDatePicker(
-              mode: mode,
+              mode:
+                  mode ??
+                  (withTime ? CupertinoDatePickerMode.dateAndTime : CupertinoDatePickerMode.date),
               initialDateTime: value,
               minimumDate: min,
               maximumDate: max,
@@ -135,9 +155,10 @@ abstract final class AppSheet {
 }
 
 class _SheetRow extends StatelessWidget {
-  const _SheetRow({required this.text, required this.onTap});
+  const _SheetRow({required this.text, required this.onTap, this.color});
 
   final String text;
+  final Color? color;
   final VoidCallback onTap;
 
   @override
@@ -148,7 +169,10 @@ class _SheetRow extends StatelessWidget {
         height: 52,
         width: double.infinity,
         child: Center(
-          child: Text(text, style: const TextStyle(fontSize: FontSizes.title)),
+          child: Text(
+            text,
+            style: TextStyle(fontSize: FontSizes.title, color: color),
+          ),
         ),
       ),
     );
@@ -165,7 +189,7 @@ class _SheetHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = context.appColors;
+    final c = context.xColors;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [

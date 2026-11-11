@@ -14,38 +14,38 @@ class DemoPage extends StatelessWidget {
       appBar: AppBar(title: const Text('示例')),
       body: ListView(
         children: [
-          FormSection(
+          XFormSection(
             title: '组件',
             children: [
-              FormItem(
+              XFormItem(
                 label: 'UI 组件一览',
                 arrow: true,
                 onTap: () => context.push(Routes.demoUiKit),
-                child: const AppText.caption('文本 / 按钮 / 标签 / 弹层…', align: TextAlign.end),
+                child: const XText.caption('文本 / 按钮 / 标签 / 弹层…', align: TextAlign.end),
               ),
-              FormItem(
+              XFormItem(
                 label: '表单',
                 arrow: true,
                 onTap: () => context.push(Routes.demoForm),
-                child: const AppText.caption('输入 / 选择 / 日期 / 提交', align: TextAlign.end),
+                child: const XText.caption('输入 / 选择 / 日期 / 提交', align: TextAlign.end),
               ),
-              FormItem(
+              XFormItem(
                 label: '详情页',
                 arrow: true,
                 onTap: () => context.push(Routes.articleDetail('0')),
-                child: const AppText.caption('下拉刷新 + 底部操作栏', align: TextAlign.end),
+                child: const XText.caption('下拉刷新 + 底部操作栏', align: TextAlign.end),
               ),
             ],
           ),
-          FormSection(
+          XFormSection(
             title: '列表状态',
             children: [
               for (final s in ListScenario.values)
-                FormItem(
+                XFormItem(
                   label: s.title,
                   arrow: true,
                   onTap: () => context.push(Routes.demoList(s)),
-                  child: AppText.caption(s.description, align: TextAlign.end, maxLines: 2),
+                  child: XText.caption(s.description, align: TextAlign.end, maxLines: 2),
                 ),
             ],
           ),

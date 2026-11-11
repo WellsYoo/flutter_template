@@ -23,19 +23,19 @@ class _ArticleListPageState extends State<ArticleListPage> {
       body: Column(
         children: [
           ColoredBox(
-            color: context.appColors.card,
+            color: context.xColors.card,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(Insets.lg, Insets.xs, Insets.lg, Insets.sm),
-              child: SearchField(
+              child: XSearchField(
                 hintText: '搜索标题，试试输入 “1” 或 “xyz”',
                 onChanged: (v) => setState(() => _keyword = v),
               ),
             ),
           ),
           Expanded(
-            child: PagedListView(
+            child: XPagedListView(
               provider: articleListProvider(_keyword),
-              empty: EmptyView(message: _keyword.isEmpty ? '暂无数据' : '没有找到“$_keyword”相关内容'),
+              empty: XEmptyView(message: _keyword.isEmpty ? '暂无数据' : '没有找到“$_keyword”相关内容'),
               itemBuilder: (context, article, _) => ArticleTile(article),
             ),
           ),
@@ -53,26 +53,26 @@ class ArticleTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tag = switch (int.parse(article.id) % 3) {
-      0 => const AppTag('已发布', type: TagType.success),
-      1 => const AppTag('审核中', type: TagType.warning),
-      _ => const AppTag('草稿', type: TagType.gray),
+      0 => const XTag('已发布', type: XTagType.success),
+      1 => const XTag('审核中', type: XTagType.warning),
+      _ => const XTag('草稿', type: XTagType.gray),
     };
-    return AppCard(
+    return XCard(
       onTap: () => context.push(Routes.articleDetail(article.id)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Expanded(child: AppText.title(article.title, maxLines: 1)),
+              Expanded(child: XText.title(article.title, maxLines: 1)),
               const SizedBox(width: Insets.sm),
               tag,
             ],
           ),
           const SizedBox(height: Insets.xs),
-          AppText.secondary(article.summary, maxLines: 2),
+          XText.secondary(article.summary, maxLines: 2),
           const SizedBox(height: Insets.sm),
-          AppText.caption('${article.author} · ${Fmt.dateTime(article.createdAt)}'),
+          XText.caption('${article.author} · ${Fmt.dateTime(article.createdAt)}'),
         ],
       ),
     );

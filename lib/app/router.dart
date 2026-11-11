@@ -12,7 +12,7 @@ import 'package:xjj_app_base/features/demo/form_demo_page.dart';
 import 'package:xjj_app_base/features/demo/ui_kit_page.dart';
 import 'package:xjj_app_base/features/home/home_shell.dart';
 import 'package:xjj_app_base/features/profile/profile_page.dart';
-import 'package:xjj_app_base/shared/ui/feedback.dart';
+import 'package:xjj_app_base/shared/ui/x_feedback.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   // 会话变化时通知 GoRouter 重新执行 redirect（登录后进首页、退出/401 后回登录页）

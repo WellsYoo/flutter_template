@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:xjj_app_base/core/theme/app_theme.dart';
+import 'package:xjj_app_base/core/theme/x_theme.dart';
 import 'package:xjj_app_base/features/demo/demo_list_page.dart';
-import 'package:xjj_app_base/shared/ui/feedback.dart';
+import 'package:xjj_app_base/shared/ui/x_feedback.dart';
 
-/// 用示例页验证 PagedListView 在各种状态下的表现
+/// 用示例页验证 XPagedListView 在各种状态下的表现
 Future<void> _pump(WidgetTester tester, ListScenario scenario) async {
   await tester.pumpWidget(
     ProviderScope(
       retry: (_, _) => null,
       child: MaterialApp(
         navigatorKey: rootNavigatorKey,
-        theme: AppTheme.light,
+        theme: XTheme.light,
         home: DemoListPage(scenario: scenario),
       ),
     ),

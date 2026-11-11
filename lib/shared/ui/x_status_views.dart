@@ -2,53 +2,78 @@ import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xjj_app_base/core/network/api_exception.dart';
-import 'package:xjj_app_base/core/theme/app_theme.dart';
+import 'package:xjj_app_base/core/theme/x_theme.dart';
 import 'package:xjj_app_base/core/utils/context_ext.dart';
-import 'package:xjj_app_base/shared/ui/app_button.dart';
-import 'package:xjj_app_base/shared/ui/app_refresh.dart';
-import 'package:xjj_app_base/shared/ui/feedback.dart';
+import 'package:xjj_app_base/shared/ui/x_button.dart';
+import 'package:xjj_app_base/shared/ui/x_feedback.dart';
+import 'package:xjj_app_base/shared/ui/x_refresh.dart';
 
-class LoadingView extends StatelessWidget {
-  const LoadingView({super.key});
+class XLoadingView extends StatelessWidget {
+  const XLoadingView({super.key});
 
   @override
   Widget build(BuildContext context) => const Center(child: CircularProgressIndicator());
 }
 
-class EmptyView extends StatelessWidget {
-  const EmptyView({super.key, this.message = '暂无数据', this.icon = Icons.inbox_outlined});
+/// 空状态。
+///
+/// ```dart
+/// XEmptyView(message: '还没有订单', actionText: '去逛逛', onAction: _goShop)
+/// XEmptyView(image: XImage('assets/images/empty.png', size: 120))
+/// ```
+class XEmptyView extends StatelessWidget {
+  const XEmptyView({
+    super.key,
+    this.message = '暂无数据',
+    this.icon = Icons.inbox_outlined,
+    this.image,
+    this.actionText,
+    this.onAction,
+  });
 
   final String message;
   final IconData icon;
 
+  /// 自定义插图，传了就不显示 [icon]
+  final Widget? image;
+
+  /// 文案下方的按钮，和 [onAction] 一起传
+  final String? actionText;
+  final VoidCallback? onAction;
+
   @override
   Widget build(BuildContext context) {
-    final hint = context.appColors.textHint;
+    final hint = context.xColors.textHint;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 64, color: hint.withValues(alpha: 0.5)),
+          image ?? Icon(icon, size: 64, color: hint.withValues(alpha: 0.5)),
           const SizedBox(height: Insets.md),
           Text(
             message,
+            textAlign: TextAlign.center,
             style: TextStyle(fontSize: FontSizes.body, color: hint),
           ),
+          if (actionText != null && onAction != null) ...[
+            const SizedBox(height: Insets.lg),
+            XButton.outline(actionText!, size: XButtonSize.medium, width: 120, onPressed: onAction),
+          ],
         ],
       ),
     );
   }
 }
 
-class ErrorView extends StatelessWidget {
-  const ErrorView({super.key, required this.error, this.onRetry});
+class XErrorView extends StatelessWidget {
+  const XErrorView({super.key, required this.error, this.onRetry});
 
   final Object error;
   final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
-    final c = context.appColors;
+    final c = context.xColors;
     final offline = ApiException.from(error).type == ApiErrorType.network;
     return Center(
       child: Padding(
@@ -69,10 +94,7 @@ class ErrorView extends StatelessWidget {
             ),
             if (onRetry != null) ...[
               const SizedBox(height: Insets.lg),
-              SizedBox(
-                width: 120,
-                child: AppButton.outline('重试', size: ButtonSize.medium, onPressed: onRetry),
-              ),
+              XButton.outline('重试', size: XButtonSize.medium, width: 120, onPressed: onRetry),
             ],
           ],
         ),
@@ -85,7 +107,7 @@ class ErrorView extends StatelessWidget {
 ///
 /// ```dart
 /// final provider = userProvider(id);
-/// AsyncValueView(
+/// XAsyncView(
 ///   value: ref.watch(provider),
 ///   onRetry: () => ref.invalidate(provider),
 ///   onRefresh: () => ref.refresh(provider.future),
@@ -95,19 +117,33 @@ class ErrorView extends StatelessWidget {
 ///
 /// 传了 [onRefresh] 时：data 返回的滚动组件（ListView 等，不要设置 physics）会包上下拉刷新；
 /// 刷新失败保留旧数据并 toast。
-class AsyncValueView<T> extends StatelessWidget {
-  const AsyncValueView({
+///
+/// 数据可能为空时传 [isEmpty]，为空显示 [empty]（默认 XEmptyView）：
+///
+/// ```dart
+/// XAsyncView(value: ref.watch(ordersProvider), isEmpty: (list) => list.isEmpty, data: ...)
+/// ```
+class XAsyncView<T> extends StatelessWidget {
+  const XAsyncView({
     super.key,
     required this.value,
     required this.data,
     this.onRetry,
     this.onRefresh,
+    this.isEmpty,
+    this.empty = const XEmptyView(),
+    this.loading = const XLoadingView(),
   });
 
   final AsyncValue<T> value;
   final Widget Function(T data) data;
   final VoidCallback? onRetry;
   final Future<Object?> Function()? onRefresh;
+
+  /// 判断数据是否为空
+  final bool Function(T data)? isEmpty;
+  final Widget empty;
+  final Widget loading;
 
   @override
   Widget build(BuildContext context) {
@@ -116,23 +152,27 @@ class AsyncValueView<T> extends StatelessWidget {
       // 已有数据时刷新失败，继续显示旧数据（错误已 toast）
       skipError: refresh != null && value.hasValue,
       data: (v) {
-        final child = data(v);
-        if (refresh == null) return child;
-        return AppRefresh(
+        final isEmpty = this.isEmpty?.call(v) ?? false;
+        if (refresh == null) return isEmpty ? empty : data(v);
+        // 空状态也要能下拉刷新
+        final child = isEmpty
+            ? CustomScrollView(slivers: [SliverFillRemaining(hasScrollBody: false, child: empty)])
+            : data(v);
+        return XRefresh(
           onRefresh: () async {
             try {
               await refresh();
               return IndicatorResult.success;
             } catch (e) {
-              Toast.error(e);
+              XToast.error(e);
               return IndicatorResult.fail;
             }
           },
           child: child,
         );
       },
-      loading: () => const LoadingView(),
-      error: (e, _) => ErrorView(error: e, onRetry: onRetry),
+      loading: () => loading,
+      error: (e, _) => XErrorView(error: e, onRetry: onRetry),
     );
   }
 }

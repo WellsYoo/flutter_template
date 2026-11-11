@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 /// 常用输入限制。
 ///
 /// ```dart
-/// FormItem.input(label: '金额', inputFormatters: [InputFormats.decimal(2)])
+/// XFormItem.input(label: '金额', inputFormatters: [InputFormats.decimal(2)])
 /// ```
 abstract final class InputFormats {
   /// 只能输入数字

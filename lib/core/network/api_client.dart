@@ -86,7 +86,7 @@ abstract final class ApiEnvelope {
 /// ```
 ///
 /// 失败一律抛 [ApiException]。传 [CancelToken]（一般用 `ref.cancelToken()`）可以中途取消，
-/// 取消时抛出 type 为 [ApiErrorType.cancel] 的异常，`Toast.error` 不会提示它。
+/// 取消时抛出 type 为 [ApiErrorType.cancel] 的异常，`XToast.error` 不会提示它。
 class ApiClient {
   ApiClient(this._dio, {this.onUnauthorized});
 

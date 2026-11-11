@@ -23,7 +23,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     super.dispose();
   }
 
-  /// AppButton 会在 Future 执行期间显示 loading，异常自动 toast
+  /// XButton 会在 Future 执行期间显示 loading，异常自动 toast
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     context.hideKeyboard();
@@ -37,7 +37,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.appColors.card,
+      backgroundColor: context.xColors.card,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -47,9 +47,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const AppText.headline('欢迎登录'),
+                  const XText.headline('欢迎登录'),
                   const SizedBox(height: Insets.xs),
-                  const AppText.caption('演示账号：任意用户名，密码 123456'),
+                  const XText.caption('演示账号：任意用户名，密码 123456'),
                   const SizedBox(height: Insets.xl),
                   TextFormField(
                     controller: _username,
@@ -72,7 +72,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     validator: (v) => Validators.required(v, '密码'),
                   ),
                   const SizedBox(height: Insets.xl),
-                  AppButton.primary('登录', block: true, onPressed: _submit),
+                  XButton.primary('登录', block: true, onPressed: _submit),
                 ],
               ),
             ),

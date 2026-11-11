@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// 品牌色。换主题色只改这一行。
+/// 默认品牌色。换主题色改这一行，或在 `XTheme.create(primary:)` 里传。
 const brandColor = Color(0xFF1677FF);
 
 /// 间距规范。页面里统一用这些常量，不要写裸数字。
@@ -22,12 +22,12 @@ abstract final class Radii {
   static const double lg = 12;
 }
 
-/// 业务语义色。用法：`context.appColors.textHint`
+/// 业务语义色。用法：`context.xColors.textHint`
 ///
 /// 文本、背景、分割线等日常用色都在这里，按名字取，不用记 Material 的色板角色。
 @immutable
-class AppColors extends ThemeExtension<AppColors> {
-  const AppColors({
+class XColors extends ThemeExtension<XColors> {
+  const XColors({
     required this.text,
     required this.textSecondary,
     required this.textHint,
@@ -65,7 +65,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color warning;
   final Color danger;
 
-  static const light = AppColors(
+  static const light = XColors(
     text: Color(0xFF333333),
     textSecondary: Color(0xFF666666),
     textHint: Color(0xFF999999),
@@ -78,7 +78,7 @@ class AppColors extends ThemeExtension<AppColors> {
     danger: Color(0xFFF93A4A),
   );
 
-  static const dark = AppColors(
+  static const dark = XColors(
     text: Color(0xFFE5E5E5),
     textSecondary: Color(0xFFA3A3A3),
     textHint: Color(0xFF737373),
@@ -92,7 +92,7 @@ class AppColors extends ThemeExtension<AppColors> {
   );
 
   @override
-  AppColors copyWith({
+  XColors copyWith({
     Color? text,
     Color? textSecondary,
     Color? textHint,
@@ -103,7 +103,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? success,
     Color? warning,
     Color? danger,
-  }) => AppColors(
+  }) => XColors(
     text: text ?? this.text,
     textSecondary: textSecondary ?? this.textSecondary,
     textHint: textHint ?? this.textHint,
@@ -117,10 +117,10 @@ class AppColors extends ThemeExtension<AppColors> {
   );
 
   @override
-  AppColors lerp(AppColors? other, double t) {
+  XColors lerp(XColors? other, double t) {
     if (other == null) return this;
     Color l(Color a, Color b) => Color.lerp(a, b, t)!;
-    return AppColors(
+    return XColors(
       text: l(text, other.text),
       textSecondary: l(textSecondary, other.textSecondary),
       textHint: l(textHint, other.textHint),
@@ -135,7 +135,7 @@ class AppColors extends ThemeExtension<AppColors> {
   }
 }
 
-/// 字号规范（逻辑像素 = 750 设计稿 px ÷ 2）。AppText 和 Material 组件共用这一套。
+/// 字号规范（逻辑像素 = 750 设计稿 px ÷ 2）。XText 和 Material 组件共用这一套。
 abstract final class FontSizes {
   /// 页面标题、AppBar 36px
   static const double headline = 18;
@@ -156,11 +156,34 @@ abstract final class FontSizes {
   static const double amount = 22;
 }
 
-abstract final class AppTheme {
-  static ThemeData get light => _build(Brightness.light, AppColors.light);
-  static ThemeData get dark => _build(Brightness.dark, AppColors.dark);
+/// 主题。默认用 [light] / [dark]；要改品牌色、圆角、字体或个别颜色时用 [create]：
+///
+/// ```dart
+/// theme: XTheme.create(primary: const Color(0xFF07C160), radius: 4),
+/// darkTheme: XTheme.create(
+///   brightness: Brightness.dark,
+///   colors: XColors.dark.copyWith(background: Colors.black),
+/// ),
+/// ```
+abstract final class XTheme {
+  static ThemeData get light => create();
+  static ThemeData get dark => create(brightness: Brightness.dark);
 
-  static ThemeData _build(Brightness brightness, AppColors c) {
+  static ThemeData create({
+    Brightness brightness = Brightness.light,
+
+    /// 品牌色：按钮、选中态、链接
+    Color primary = brandColor,
+
+    /// 语义色，默认按 [brightness] 取 [XColors.light] / [XColors.dark]
+    XColors? colors,
+
+    /// 按钮、输入框、卡片的圆角
+    double radius = Radii.md,
+    String? fontFamily,
+  }) {
+    final c = colors ?? (brightness == Brightness.dark ? XColors.dark : XColors.light);
+    final brandColor = primary;
     final scheme = ColorScheme.fromSeed(seedColor: brandColor, brightness: brightness).copyWith(
       primary: brandColor,
       onPrimary: Colors.white,
@@ -172,7 +195,7 @@ abstract final class AppTheme {
       error: c.danger,
       surfaceTint: Colors.transparent,
     );
-    final base = ThemeData(brightness: brightness, colorScheme: scheme);
+    final base = ThemeData(brightness: brightness, colorScheme: scheme, fontFamily: fontFamily);
     final textTheme = base.textTheme.copyWith(
       titleLarge: base.textTheme.titleLarge?.copyWith(
         fontSize: FontSizes.headline,
@@ -186,8 +209,8 @@ abstract final class AppTheme {
       bodyMedium: base.textTheme.bodyMedium?.copyWith(fontSize: FontSizes.body),
       bodySmall: base.textTheme.bodySmall?.copyWith(fontSize: FontSizes.caption, color: c.textHint),
     );
-    final radius = BorderRadius.circular(Radii.md);
-    final buttonShape = RoundedRectangleBorder(borderRadius: radius);
+    final borderRadius = BorderRadius.circular(radius);
+    final buttonShape = RoundedRectangleBorder(borderRadius: borderRadius);
 
     return base.copyWith(
       extensions: [c],
@@ -211,15 +234,15 @@ abstract final class AppTheme {
         elevation: 0,
         margin: EdgeInsets.zero,
         color: c.card,
-        shape: RoundedRectangleBorder(borderRadius: radius),
+        shape: RoundedRectangleBorder(borderRadius: borderRadius),
       ),
       dividerTheme: DividerThemeData(space: 1, thickness: 0.5, color: c.divider),
       listTileTheme: ListTileThemeData(tileColor: c.card, iconColor: c.textSecondary),
       inputDecorationTheme: InputDecorationTheme(
         hintStyle: TextStyle(color: c.textHint, fontSize: FontSizes.body),
-        border: OutlineInputBorder(borderRadius: radius),
+        border: OutlineInputBorder(borderRadius: borderRadius),
         enabledBorder: OutlineInputBorder(
-          borderRadius: radius,
+          borderRadius: borderRadius,
           borderSide: BorderSide(color: c.border),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: Insets.md, vertical: Insets.md),
@@ -232,7 +255,7 @@ abstract final class AppTheme {
           minimumSize: const Size(64, 44),
           shape: buttonShape,
           foregroundColor: brandColor,
-          side: const BorderSide(color: brandColor),
+          side: BorderSide(color: brandColor),
         ),
       ),
       textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(shape: buttonShape)),

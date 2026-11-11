@@ -16,40 +16,40 @@ class ArticleDetailPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('详情')),
-      body: AsyncValueView(
+      body: XAsyncView(
         value: value,
         onRetry: () => ref.invalidate(provider),
         onRefresh: () => ref.refresh(provider.future),
         data: (article) => ListView(
           padding: const EdgeInsets.all(Insets.lg),
           children: [
-            AppCard(
+            XCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  AppText.headline(article.title),
+                  XText.headline(article.title),
                   const SizedBox(height: Insets.md),
-                  InfoRow('作者', article.author),
-                  InfoRow('发布时间', Fmt.dateTime(article.createdAt)),
-                  InfoRow('编号', 'NO.${article.id.padLeft(6, '0')}'),
+                  XInfoRow('作者', article.author),
+                  XInfoRow('发布时间', Fmt.dateTime(article.createdAt)),
+                  XInfoRow('编号', 'NO.${article.id.padLeft(6, '0')}'),
                 ],
               ),
             ),
             const SizedBox(height: Insets.md),
-            AppCard(child: AppText.body(article.summary)),
+            XCard(child: XText.body(article.summary)),
           ],
         ),
       ),
       // 数据加载成功后才显示底部按钮
       bottomNavigationBar: value.hasValue
-          ? BottomBar(
+          ? XBottomBar(
               children: [
-                AppButton.outline('分享', onPressed: () => Toast.show('已复制链接')),
-                AppButton.primary(
+                XButton.outline('分享', onPressed: () => XToast.show('已复制链接')),
+                XButton.primary(
                   '收藏',
                   onPressed: () async {
                     await Future<void>.delayed(const Duration(milliseconds: 800));
-                    Toast.success('收藏成功');
+                    XToast.success('收藏成功');
                   },
                 ),
               ],
