@@ -50,6 +50,11 @@ fvm flutter test
 | `XBottomBar` | 页面底部操作栏，处理安全区，按钮等分 | `bottomNavigationBar: XBottomBar(children: [...])` |
 | `XFormSection` / `XFormItem` | 表单分组和表单行；`picker` / `date` 自带弹层；`help` 说明文字；`XFormSection(labelWidth:)` 统一标签宽度 | `XFormItem.input` `.select` `.textarea` `.switcher` `.text` `XFormItem.radio` `XFormItem.picker` `XFormItem.date` |
 | `XImage` | 图片，统一占位和失败图 | `XImage(url, width: 120, height: 80, radius: 8)`、`XImage.avatar(url, size: 40)` |
+| `XBadge` | 角标：红点 / 数字 | `XBadge(count: unread, child: Icon(...))` |
+| `XStepper` | 数量步进器 | `XStepper(value: n, min: 1, max: stock, onChanged: ...)` |
+| `XCountdownButton` | 验证码倒计时按钮，发送成功才开始倒计时 | `XCountdownButton(onSend: () => repo.sendCode(phone))` |
+| `XExpandableText` | 长文本展开 / 收起 | `XExpandableText(content, maxLines: 3)` |
+| `XSkeleton` | 骨架屏占位块 | `XSkeleton(width: 120)` `XSkeleton.circle(size: 40)` |
 | `XSearchField` | 搜索框，自带防抖和清除；`round` 灰底胶囊样式 | `XSearchField(onChanged: ...)` |
 | `XPagedListView` | 分页列表（EasyRefresh） | 见下文 |
 | `XAsyncView` | 异步数据的加载 / 失败 / 空 / 刷新 | `XAsyncView(value: ..., onRefresh: ..., isEmpty: (d) => d.isEmpty, data: ...)` |
@@ -76,6 +81,23 @@ darkTheme: XTheme.create(
   colors: XColors.dark.copyWith(background: Colors.black),
 ),
 ```
+
+## 工具类
+
+除 `json.dart`、`ref_ext.dart` 外都已由 `ui.dart` 导出。
+
+| 工具 | 用途 | 示例 |
+| --- | --- | --- |
+| `Fmt` | 日期 / 数字格式化 | `Fmt.date` `.dateTime` `.time` `.timeAgo`（刚刚 / 5分钟前 / 昨天 14:05）`.money` `.number` `.percent` `.count`（1.2万）`.fileSize` `.duration` |
+| 字符串扩展 | 判空、转换、脱敏 | `s.isBlank` `s.nullIfBlank` `s.toIntOrNull()` `phone.mask()` `s.ellipsis(10)` `name.orDefault()` |
+| 集合扩展 | 标准库没有的常用操作 | `list.firstWhereOrNull` `.groupBy` `.distinctBy` `.sumBy` `.chunked(3)` `.separatedBy` |
+| 日期扩展 | 起止时间、加减月 | `d.startOfDay` `.endOfDay` `.startOfMonth` `.endOfMonth` `.isToday` `.isSameDay` `.addMonths(1)` |
+| `JsonX`（`core/utils/json.dart`） | 手写 `fromJson` 时宽松取值，类型不符返回默认值不抛异常 | `json.str('id')` `.integer` `.number` `.boolean` `.date` `.obj` `.list` `.listOf<String>` |
+| `Validators` / `InputFormats` | 校验 / 输入限制 | `Validators.required` `.phone` `.email` `.url` `.length` `.idCard`；`InputFormats.decimal(2)` `.phone` `.idCard` `.digits` |
+| `Debouncer` / `Throttler` | 防抖 / 节流 | `_debouncer(() => _search(v))` |
+| `LocalStorage` 扩展 | 存取 bool / int / double / JSON / 模型 | `storage.setBool(key, true)` `storage.getObject(key, User.fromJson)` |
+| `ref.cancelToken()` | provider 释放时取消请求 | 见 `features/article/article_providers.dart` |
+| `ref.cacheFor()`（`core/utils/ref_ext.dart`） | autoDispose 的 provider 离开页面后再缓存一段时间 | `ref.cacheFor(const Duration(minutes: 5))` |
 
 ### 和旧版 xjj_app_base 组件的对应
 
@@ -140,7 +162,7 @@ lib/
 │   ├── session/           登录会话（token）
 │   ├── storage/           LocalStorage 接口 + 实现
 │   ├── theme/             主题、颜色、字号、间距、主题模式
-│   └── utils/             context 扩展、格式化、输入限制、日志
+│   └── utils/             扩展方法、格式化、JSON 取值、校验、防抖节流、日志
 ├── shared/
 │   ├── pagination.dart    PagedNotifier 分页基类
 │   └── ui/                UI 组件库，ui.dart 为总入口

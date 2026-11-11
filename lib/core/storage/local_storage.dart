@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,6 +10,59 @@ abstract interface class LocalStorage {
   String? getString(String key);
   Future<void> setString(String key, String value);
   Future<void> remove(String key);
+}
+
+/// 其他类型的读写，都基于字符串存储。读到的内容类型不对时返回 null，不抛异常。
+///
+/// ```dart
+/// await storage.setBool(StorageKeys.agreed, true);
+/// final agreed = storage.getBool(StorageKeys.agreed) ?? false;
+///
+/// await storage.setJson(StorageKeys.user, user.toJson());
+/// final user = storage.getObject(StorageKeys.user, User.fromJson);
+/// ```
+extension LocalStorageX on LocalStorage {
+  bool? getBool(String key) => switch (getString(key)) {
+    'true' => true,
+    'false' => false,
+    _ => null,
+  };
+
+  Future<void> setBool(String key, bool value) => setString(key, '$value');
+
+  int? getInt(String key) => int.tryParse(getString(key) ?? '');
+
+  Future<void> setInt(String key, int value) => setString(key, '$value');
+
+  double? getDouble(String key) => double.tryParse(getString(key) ?? '');
+
+  Future<void> setDouble(String key, double value) => setString(key, '$value');
+
+  /// 读取 JSON 对象；没有或内容损坏时返回 null
+  Map<String, dynamic>? getJson(String key) {
+    final raw = getString(key);
+    if (raw == null) return null;
+    try {
+      final value = jsonDecode(raw);
+      return value is Map<String, dynamic> ? value : null;
+    } on FormatException {
+      return null;
+    }
+  }
+
+  /// [value] 必须能被 jsonEncode（Map / List / 基础类型）
+  Future<void> setJson(String key, Object value) => setString(key, jsonEncode(value));
+
+  /// 读取并转成模型；没有、内容损坏或 [fromJson] 抛异常时返回 null
+  T? getObject<T>(String key, T Function(Map<String, dynamic> json) fromJson) {
+    final json = getJson(key);
+    if (json == null) return null;
+    try {
+      return fromJson(json);
+    } catch (_) {
+      return null;
+    }
+  }
 }
 
 /// 全局存储实例。在 main 里通过 overrideWithValue 注入，见 main.dart。

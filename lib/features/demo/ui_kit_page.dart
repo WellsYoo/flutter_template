@@ -3,8 +3,15 @@ import 'package:xjj_app_base/core/network/api_exception.dart';
 import 'package:xjj_app_base/shared/ui/ui.dart';
 
 /// 组件一览：文本、按钮、标签、卡片、列表行、图片、反馈、弹层。
-class UiKitPage extends StatelessWidget {
+class UiKitPage extends StatefulWidget {
   const UiKitPage({super.key});
+
+  @override
+  State<UiKitPage> createState() => _UiKitPageState();
+}
+
+class _UiKitPageState extends State<UiKitPage> {
+  int _count = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -260,6 +267,49 @@ class UiKitPage extends StatelessWidget {
             ),
           ),
           const _Block(title: 'XSearchField 搜索框', child: XSearchField(round: true)),
+          _Block(
+            title: '角标 / 步进器 / 验证码倒计时',
+            child: Wrap(
+              spacing: Insets.xl,
+              runSpacing: Insets.md,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                const XBadge(count: 8, child: Icon(Icons.notifications_outlined)),
+                const XBadge(count: 120, child: Icon(Icons.mail_outline)),
+                const XBadge(dot: true, child: XText.body('消息')),
+                XStepper(value: _count, max: 5, onChanged: (v) => setState(() => _count = v)),
+                XCountdownButton(
+                  seconds: 10,
+                  onSend: () => Future<void>.delayed(const Duration(milliseconds: 500)),
+                ),
+              ],
+            ),
+          ),
+          const _Block(
+            title: 'XExpandableText 展开收起',
+            child: XExpandableText(
+              '这是一段比较长的文字，用来演示超过指定行数之后自动折叠，并在末尾显示“展开”。'
+              '点击展开后显示全部内容，末尾变成“收起”，再点一次恢复折叠。'
+              '常用于商品详情、评论、公告这类长度不确定的内容。',
+              maxLines: 2,
+            ),
+          ),
+          const _Block(
+            title: 'XSkeleton 骨架屏',
+            child: Row(
+              children: [
+                XSkeleton.circle(),
+                SizedBox(width: Insets.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: Insets.sm,
+                    children: [XSkeleton(), XSkeleton(width: 120)],
+                  ),
+                ),
+              ],
+            ),
+          ),
           _Block(
             title: '状态视图',
             child: SizedBox(

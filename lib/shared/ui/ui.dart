@@ -3,6 +3,8 @@ library;
 
 export 'package:xjj_app_base/core/theme/x_theme.dart';
 export 'package:xjj_app_base/core/utils/context_ext.dart';
+export 'package:xjj_app_base/core/utils/debounce.dart';
+export 'package:xjj_app_base/core/utils/extensions.dart';
 export 'package:xjj_app_base/core/utils/formatters.dart';
 export 'package:xjj_app_base/core/utils/input_formatters.dart';
 
@@ -19,3 +21,4 @@ export 'x_search_field.dart';
 export 'x_sheet.dart';
 export 'x_status_views.dart';
 export 'x_text.dart';
+export 'x_widgets.dart';

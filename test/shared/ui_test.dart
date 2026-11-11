@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -176,6 +177,92 @@ void main() {
       await tester.tapAt(box.topLeft + const Offset(5, 5));
       expect(taps, 1);
     });
+  });
+
+  testWidgets('XBadge：0 不显示，超过上限显示 99+', (tester) async {
+    await _pump(tester, const Center(child: XBadge(child: Text('消息'))));
+    expect(find.descendant(of: find.byType(XBadge), matching: find.byType(Stack)), findsNothing);
+    await _pump(tester, const Center(child: XBadge(count: 5, child: Text('消息'))));
+    expect(find.text('5'), findsOneWidget);
+    await _pump(tester, const Center(child: XBadge(count: 120, child: Text('消息'))));
+    expect(find.text('99+'), findsOneWidget);
+  });
+
+  testWidgets('XStepper：到上下限后不再变化', (tester) async {
+    var value = 1;
+    await _pump(
+      tester,
+      StatefulBuilder(
+        builder: (context, setState) =>
+            XStepper(value: value, max: 2, onChanged: (v) => setState(() => value = v)),
+      ),
+    );
+    await tester.tap(find.byIcon(Icons.remove));
+    expect(value, 1);
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pump();
+    expect(value, 2);
+  });
+
+  group('XCountdownButton', () {
+    testWidgets('发送成功后倒计时，结束后可重新获取', (tester) async {
+      var sends = 0;
+      await _pump(tester, XCountdownButton(seconds: 3, onSend: () async => sends++));
+      await tester.tap(find.text('获取验证码'));
+      await tester.pump();
+      await tester.pump();
+      expect(sends, 1);
+      expect(find.text('3s'), findsOneWidget);
+
+      await tester.tap(find.text('3s'), warnIfMissed: false);
+      expect(sends, 1, reason: '倒计时中不能点击');
+
+      await tester.pump(const Duration(seconds: 4));
+      expect(find.text('重新获取'), findsOneWidget);
+    });
+
+    testWidgets('发送失败：toast 提示，不倒计时', (tester) async {
+      await _pump(
+        tester,
+        XCountdownButton(
+          onSend: () async => throw const ApiException(ApiErrorType.business, '发送太频繁'),
+        ),
+      );
+      await tester.tap(find.text('获取验证码'));
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('发送太频繁'), findsOneWidget);
+      expect(find.text('获取验证码'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 3));
+    });
+  });
+
+  testWidgets('XExpandableText：长文本折叠，点击展开 / 收起；短文本不显示按钮', (tester) async {
+    final long = '很长的文字' * 60;
+    await _pump(tester, XExpandableText(long, maxLines: 2));
+    final collapsed = tester.getSize(find.byType(XExpandableText)).height;
+    expect(find.textContaining('展开', findRichText: true), findsOneWidget);
+
+    // “展开”是文字里的一段，直接触发它的点击回调
+    final rich = tester.widget<RichText>(
+      find.descendant(of: find.byType(XExpandableText), matching: find.byType(RichText)),
+    );
+    TapGestureRecognizer? link;
+    rich.text.visitChildren((span) {
+      if (span is TextSpan && span.recognizer != null) {
+        link = span.recognizer! as TapGestureRecognizer;
+      }
+      return true;
+    });
+    link!.onTap!();
+    await tester.pump();
+    expect(find.textContaining('收起', findRichText: true), findsOneWidget);
+    expect(tester.getSize(find.byType(XExpandableText)).height, greaterThan(collapsed));
+
+    await _pump(tester, const XExpandableText('短文本', maxLines: 2));
+    expect(find.textContaining('展开', findRichText: true), findsNothing);
   });
 
   testWidgets('XCell：显示值，可点击时带箭头', (tester) async {
