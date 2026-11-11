@@ -41,8 +41,12 @@ abstract final class Toast {
 
   static void success(String message) => show(message, icon: Icons.check_circle_outline);
 
-  /// 直接传异常，自动转成可读文案
-  static void error(Object error) => show(errorMessageOf(error), icon: Icons.error_outline);
+  /// 直接传异常，自动转成可读文案。主动取消的请求不提示。
+  static void error(Object error) {
+    final e = ApiException.from(error);
+    if (e.type == ApiErrorType.cancel) return;
+    show(e.message, icon: Icons.error_outline);
+  }
 }
 
 class _ToastView extends StatefulWidget {

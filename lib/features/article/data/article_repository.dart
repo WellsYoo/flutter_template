@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xjj_app_base/core/network/api_client.dart';
 import 'package:xjj_app_base/features/article/data/article.dart';
@@ -8,8 +9,9 @@ abstract interface class ArticleRepository {
     required int page,
     required int size,
     String keyword = '',
+    CancelToken? cancelToken,
   });
-  Future<Article> fetchDetail(String id);
+  Future<Article> fetchDetail(String id, {CancelToken? cancelToken});
 }
 
 /// 接入真实后端：`ApiArticleRepository(ref.watch(apiClientProvider))`
@@ -25,9 +27,11 @@ class ApiArticleRepository implements ArticleRepository {
     required int page,
     required int size,
     String keyword = '',
+    CancelToken? cancelToken,
   }) {
     return _api.get(
       '/articles',
+      cancelToken: cancelToken,
       query: {'page': page, 'size': size, if (keyword.isNotEmpty) 'keyword': keyword},
       decode: (data) {
         final map = data! as Map<String, dynamic>;
@@ -41,8 +45,11 @@ class ApiArticleRepository implements ArticleRepository {
   }
 
   @override
-  Future<Article> fetchDetail(String id) =>
-      _api.get('/articles/$id', decode: (d) => Article.fromJson(d! as Map<String, dynamic>));
+  Future<Article> fetchDetail(String id, {CancelToken? cancelToken}) => _api.get(
+    '/articles/$id',
+    cancelToken: cancelToken,
+    decode: (d) => Article.fromJson(d! as Map<String, dynamic>),
+  );
 }
 
 /// 演示用的本地假数据，共 [total] 条。
@@ -57,6 +64,7 @@ class FakeArticleRepository implements ArticleRepository {
     required int page,
     required int size,
     String keyword = '',
+    CancelToken? cancelToken,
   }) async {
     await Future<void>.delayed(delay);
     final matched = [
@@ -68,7 +76,7 @@ class FakeArticleRepository implements ArticleRepository {
   }
 
   @override
-  Future<Article> fetchDetail(String id) async {
+  Future<Article> fetchDetail(String id, {CancelToken? cancelToken}) async {
     await Future<void>.delayed(delay);
     return _article(int.parse(id));
   }

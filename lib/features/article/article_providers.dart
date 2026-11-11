@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:xjj_app_base/core/network/api_client.dart';
 import 'package:xjj_app_base/features/article/data/article.dart';
 import 'package:xjj_app_base/features/article/data/article_repository.dart';
 import 'package:xjj_app_base/shared/pagination.dart';
@@ -17,11 +18,18 @@ class ArticleListNotifier extends PagedNotifier<Article> {
   final String keyword;
 
   @override
-  Future<PageResult<Article>> fetchPage(int page) =>
-      ref.read(articleRepositoryProvider).fetchPage(page: page, size: pageSize, keyword: keyword);
+  Future<PageResult<Article>> fetchPage(int page) => ref
+      .read(articleRepositoryProvider)
+      .fetchPage(
+        page: page,
+        size: pageSize,
+        keyword: keyword,
+        // 离开页面或搜索词变化时，取消还没返回的请求
+        cancelToken: ref.cancelToken(),
+      );
 }
 
 /// 详情：只读数据用 FutureProvider 就够了，按 id 区分
 final articleDetailProvider = FutureProvider.autoDispose.family<Article, String>(
-  (ref, id) => ref.watch(articleRepositoryProvider).fetchDetail(id),
+  (ref, id) => ref.watch(articleRepositoryProvider).fetchDetail(id, cancelToken: ref.cancelToken()),
 );
