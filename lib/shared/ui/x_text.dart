@@ -128,25 +128,25 @@ class XText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = context.xColors;
-    final (defaultSize, defaultWeight, defaultColor) = switch (_kind) {
-      _TextKind.headline => (FontSizes.headline, FontWeight.w600, c.text),
-      _TextKind.title => (FontSizes.title, FontWeight.w500, c.text),
-      _TextKind.body => (FontSizes.body, FontWeight.normal, c.text),
-      _TextKind.secondary => (FontSizes.secondary, FontWeight.normal, c.textSecondary),
-      _TextKind.caption => (FontSizes.caption, FontWeight.normal, c.textHint),
+    final styles = context.textStyles;
+    final base = switch (_kind) {
+      _TextKind.headline => styles.headline,
+      _TextKind.title => styles.title,
+      _TextKind.body => styles.body,
+      _TextKind.secondary => styles.secondary,
+      _TextKind.caption => styles.caption,
     };
-    final textColor = color ?? defaultColor;
+    final textColor = color ?? base.color;
     return Text(
       data,
       maxLines: maxLines,
       overflow: maxLines == null ? null : TextOverflow.ellipsis,
       textAlign: align,
-      style: TextStyle(
-        fontSize: size ?? defaultSize,
-        fontWeight: weight ?? (bold ? FontWeight.w600 : defaultWeight),
+      style: base.copyWith(
+        fontSize: size,
+        fontWeight: weight ?? (bold ? FontWeights.semibold : null),
         color: textColor,
-        height: height ?? 1.4,
+        height: height,
         decoration: lineThrough ? TextDecoration.lineThrough : null,
         decorationColor: textColor,
       ),
@@ -174,7 +174,7 @@ class _MoneyText extends StatelessWidget {
           TextSpan(text: value == null ? '--' : Fmt.money(value)),
         ],
       ),
-      style: TextStyle(color: c, fontSize: fontSize, fontWeight: FontWeight.w600),
+      style: TextStyle(color: c, fontSize: fontSize, fontWeight: FontWeights.semibold),
     );
   }
 }

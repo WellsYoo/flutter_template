@@ -17,7 +17,7 @@ class XCard extends StatelessWidget {
     required this.child,
     this.onTap,
     this.onLongPress,
-    this.padding = const EdgeInsets.all(Insets.lg),
+    this.padding = XPad.all16,
     this.margin = EdgeInsets.zero,
     this.color,
     this.radius,
@@ -41,7 +41,7 @@ class XCard extends StatelessWidget {
 
   static BorderRadiusGeometry _themeRadius(BuildContext context) {
     final shape = context.theme.cardTheme.shape;
-    return shape is RoundedRectangleBorder ? shape.borderRadius : BorderRadius.circular(Radii.md);
+    return shape is RoundedRectangleBorder ? shape.borderRadius : BorderRadius.circular(8);
   }
 
   @override
@@ -98,7 +98,7 @@ class XInfoRow extends StatelessWidget {
     final c = context.xColors;
     final v = value == null || value!.isEmpty ? '--' : value!;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: Insets.xs),
+      padding: XPad.v4,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -167,7 +167,7 @@ class XTag extends StatelessWidget {
       decoration: BoxDecoration(
         color: outlined ? null : color.withValues(alpha: 0.1),
         border: outlined ? Border.all(color: color, width: 0.5) : null,
-        borderRadius: BorderRadius.circular(Radii.sm),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -213,13 +213,10 @@ class XBottomBar extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        minimum: const EdgeInsets.only(bottom: Insets.sm),
+        minimum: const EdgeInsets.only(bottom: 8),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(Insets.lg, Insets.sm, Insets.lg, 0),
-          child: Row(
-            spacing: Insets.md,
-            children: [for (final child in children) Expanded(child: child)],
-          ),
+          padding: const XPad.ltrb(16, 8, 16, 0),
+          child: Row(spacing: 12, children: [for (final child in children) Expanded(child: child)]),
         ),
       ),
     );

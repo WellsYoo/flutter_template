@@ -265,6 +265,29 @@ void main() {
     expect(find.textContaining('展开', findRichText: true), findsNothing);
   });
 
+  testWidgets('样式：XGap / XPad 有预设也可自定义，textStyles 与 XText 一致', (tester) async {
+    expect(XGap.v8.height, 8);
+    expect(XGap.h12.width, 12);
+    expect(XPad.all16, const EdgeInsets.all(16));
+    expect(XPad.h16 + XPad.v8, const EdgeInsets.symmetric(horizontal: 16, vertical: 8));
+    expect(const XGap.v(18).height, 18);
+    expect(const XGap.h(6).width, 6);
+    expect(const XPad.all(16), const EdgeInsets.all(16));
+    expect(const XPad.h(10), const EdgeInsets.symmetric(horizontal: 10));
+    expect(const XPad.hv(16, 8), const EdgeInsets.symmetric(horizontal: 16, vertical: 8));
+    expect(const XPad.only(top: 3), const EdgeInsets.only(top: 3));
+    expect(const XPad.ltrb(1, 2, 3, 4), const EdgeInsets.fromLTRB(1, 2, 3, 4));
+    expect(XPad.page, const EdgeInsets.symmetric(horizontal: 16));
+
+    late BuildContext context;
+    await _pump(tester, Builder(builder: (c) => (context = c, const XText.title('标题')).$2));
+    final style = tester.widget<Text>(find.text('标题')).style!;
+    expect(style.fontSize, context.textStyles.title.fontSize);
+    expect(style.fontWeight, FontWeights.medium);
+    expect(style.color, XColors.light.text);
+    expect(context.primary, brandColor);
+  });
+
   testWidgets('XCell：显示值，可点击时带箭头', (tester) async {
     var tapped = false;
     await _pump(

@@ -36,17 +36,17 @@ class ProfilePage extends ConsumerWidget {
           ColoredBox(
             color: context.xColors.card,
             child: Padding(
-              padding: const EdgeInsets.all(Insets.lg),
+              padding: XPad.all16,
               child: Row(
                 children: [
                   const XImage.avatar(null, size: 56),
-                  const SizedBox(width: Insets.md),
+                  XGap.h12,
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         XText.title(token.replaceFirst('fake-token-', '')),
-                        const SizedBox(height: Insets.xs),
+                        XGap.v4,
                         const XTag('普通会员'),
                       ],
                     ),
@@ -67,9 +67,9 @@ class ProfilePage extends ConsumerWidget {
               const XCell('当前环境', icon: Icons.dns_outlined, value: AppConfig.env),
             ],
           ),
-          const SizedBox(height: Insets.xl),
+          XGap.v24,
           Padding(
-            padding: Insets.page,
+            padding: XPad.page,
             child: XButton.outline(
               '退出登录',
               block: true,

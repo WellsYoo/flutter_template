@@ -66,11 +66,23 @@ fvm flutter test
 | `XSheet` | 底部弹层 | `XSheet.actions` `.select` `.multiSelect` `.date` `.custom` |
 | `InputFormats` / `Validators` | 输入限制 / 校验 | `InputFormats.decimal(2)` `InputFormats.phone` `Validators.phone(v)` |
 
-样式常量：颜色 `context.xColors.text / textSecondary / textHint / divider / background / card / success / warning / danger`，
-主色 `context.colors.primary`；字号 `FontSizes`；间距 `Insets`；圆角 `Radii`。
+### 样式常量
+
+| 要什么 | 用什么 | 示例 |
+| --- | --- | --- |
+| 空白 | 预设 `XGap.v8` / `XGap.h12`…（v 上下、h 左右，数字即大小：2 / 4 / 6 / 8 / 10 / 12 / 16 / 20 / 24 / 32）；自定义 `XGap.v(n)` / `XGap.h(n)` | `XGap.v8` `const XGap.v(18)` |
+| 内边距 | 预设 `XPad.all16` / `XPad.h16` / `XPad.v8`…（4 / 8 / 10 / 12 / 16 / 20 / 24 / 32）、`XPad.page`；自定义 `XPad.all(n)` / `.h(n)` / `.v(n)` / `.hv(h, v)` / `.only(...)` / `.ltrb(...)` | `XPad.all16` `XPad.hv(16, 8)` |
+| 圆角 | 各组件的 `radius` 参数直接填数字；全局默认圆角在 `XTheme.create(radius:)` | `XContainer(radius: 12)` |
+| 字号 | `FontSizes.headline/title/body/secondary/caption/amount`（18 / 16 / 14 / 13 / 12 / 22） | |
+| 字重 | `FontWeights.regular/medium/semibold/bold` | |
+| 文字样式 | `context.textStyles.headline/title/body/secondary/caption`（和 `XText` 同一套） | `TextField(style: context.textStyles.body)` |
+| 颜色 | `context.primary`；`context.xColors.text / textSecondary / textHint / textDisabled / divider / border / background / card / fill / mask / success / warning / danger` | |
+| 屏幕 | `context.screenSize` `context.safeTop` `context.safeBottom` | |
+
+颜色跟随深浅色主题，所以从 `context` 取；其余是固定常量。
 尺寸单位是逻辑像素，750 设计稿上的 px 除以 2。
 
-组件统一用 `X` 前缀（`XButton`、`XText`…），文件名 `x_*.dart`；主题常量 `Insets` / `Radii` / `FontSizes` 不带前缀。
+组件统一用 `X` 前缀（`XButton`、`XText`…），文件名 `x_*.dart`。间距有常用预设（名字里带数值），也可以自定义。
 
 换品牌色、圆角、字体或个别颜色，在 `app/app.dart` 里用 `XTheme.create`：
 
@@ -105,7 +117,7 @@ darkTheme: XTheme.create(
 | --- | --- |
 | `ScreenText.title / subTitle / content / weak` | `XText.title / body / secondary / caption` |
 | `context.colorStyle.textBiz / textSubBiz / dividerLine` | `context.xColors.text / textHint / divider` |
-| `context.sizeStyle.hSpacingStandard`、`ScreenSpacer`、`ScreenPadding` | `Insets.lg`、`SizedBox`、`Padding` |
+| `context.sizeStyle.hSpacingStandard`、`ScreenSpacer`、`ScreenPadding` | `XGap.v16` / `XGap.h16`、`XPad.all16` |
 | `ScreenButton.text / ScreenOutlineButton.text` | `XButton.primary / XButton.outline` |
 | `ScreenBottomBar` + `ScreenBottomButton` | `XBottomBar` + `XButton` |
 | `ScreenSettingItem.choose / inputText / inputMultiLine / operateSwitch / radio / view` | `XFormItem.select / input / textarea / switcher / radio / text` |
@@ -213,7 +225,7 @@ lib/
 - **按钮 loading**：`XButton` 的 `onPressed` 返回 Future 就会转圈。只有“等接口”才返回 Future；
   弹确认框这类等用户操作的，写成 `() => unawaited(_confirm())`。
 - **跳转**：`context.push(Routes.xxx)`，不手写路径字符串。登录态变化不需要手动跳转，路由守卫会处理。
-- **样式**：用 `XText`、`context.xColors`、`Insets`、`Radii`，不写裸色值和数字。
+- **样式**：用 `XText`、`context.xColors`，不写裸色值；间距用 `XGap` / `XPad`，数值按设计稿填。
 - **本地存储**：key 统一加到 `StorageKeys`。
 - **测试**：Repository 都有接口，测试里用 `overrideWithValue` 换成假实现，见 `test/`。
 

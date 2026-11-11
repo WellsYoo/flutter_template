@@ -49,7 +49,7 @@ class DemoPage extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: Insets.xl),
+          XGap.v24,
         ],
       ),
     );

@@ -59,7 +59,7 @@ class XCell extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 52),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: Insets.lg, vertical: Insets.md),
+            padding: const XPad.hv(16, 12),
             child: Row(
               children: [
                 if (leading != null) ...[
@@ -67,7 +67,7 @@ class XCell extends StatelessWidget {
                     data: IconThemeData(color: c.textSecondary),
                     child: leading,
                   ),
-                  const SizedBox(width: Insets.md),
+                  XGap.h12,
                 ],
                 Expanded(
                   child: Column(
@@ -89,7 +89,7 @@ class XCell extends StatelessWidget {
                   ),
                 ),
                 if (value != null) ...[
-                  const SizedBox(width: Insets.md),
+                  XGap.h12,
                   Flexible(
                     child: Text(
                       value!,
@@ -103,9 +103,9 @@ class XCell extends StatelessWidget {
                     ),
                   ),
                 ],
-                if (trailing != null) ...[const SizedBox(width: Insets.sm), trailing!],
+                if (trailing != null) ...[XGap.h8, trailing!],
                 if (arrow ?? onTap != null) ...[
-                  const SizedBox(width: Insets.xs),
+                  XGap.h4,
                   Icon(Icons.chevron_right, size: 20, color: c.textHint),
                 ],
               ],

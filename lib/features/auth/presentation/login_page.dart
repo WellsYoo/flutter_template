@@ -41,16 +41,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(Insets.xl),
+            padding: XPad.all24,
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const XText.headline('欢迎登录'),
-                  const SizedBox(height: Insets.xs),
+                  XGap.v4,
                   const XText.caption('演示账号：任意用户名，密码 123456'),
-                  const SizedBox(height: Insets.xl),
+                  XGap.v24,
                   TextFormField(
                     controller: _username,
                     decoration: const InputDecoration(
@@ -60,7 +60,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     textInputAction: TextInputAction.next,
                     validator: (v) => Validators.required(v, '用户名'),
                   ),
-                  const SizedBox(height: Insets.lg),
+                  XGap.v16,
                   TextFormField(
                     controller: _password,
                     decoration: const InputDecoration(
@@ -71,7 +71,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     onFieldSubmitted: (_) => _submit(),
                     validator: (v) => Validators.required(v, '密码'),
                   ),
-                  const SizedBox(height: Insets.xl),
+                  XGap.v24,
                   XButton.primary('登录', block: true, onPressed: _submit),
                 ],
               ),

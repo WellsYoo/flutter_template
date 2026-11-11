@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xjj_app_base/core/network/api_exception.dart';
-import 'package:xjj_app_base/core/theme/x_theme.dart';
 import 'package:xjj_app_base/shared/pagination.dart';
 import 'package:xjj_app_base/shared/ui/x_paged_list_view.dart';
 
@@ -72,7 +71,7 @@ class DemoListPage extends StatelessWidget {
       body: XPagedListView(
         provider: demoListProvider(scenario),
         padding: EdgeInsets.zero,
-        separator: const Divider(indent: Insets.lg),
+        separator: const Divider(indent: 16),
         itemBuilder: (context, item, index) => ListTile(title: Text(item)),
       ),
     );

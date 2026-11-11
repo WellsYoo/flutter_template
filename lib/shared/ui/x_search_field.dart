@@ -100,7 +100,7 @@ class _XSearchFieldState extends State<XSearchField> {
         border: widget.round ? pill : null,
         enabledBorder: widget.round ? pill : null,
         focusedBorder: widget.round ? pill : null,
-        contentPadding: widget.round ? const EdgeInsets.symmetric(vertical: Insets.sm) : null,
+        contentPadding: widget.round ? XPad.v8 : null,
         prefixIcon: Icon(Icons.search, size: 20, color: c.textHint),
         suffixIcon: _controller.text.isEmpty
             ? null

@@ -21,21 +21,21 @@ class ArticleDetailPage extends ConsumerWidget {
         onRetry: () => ref.invalidate(provider),
         onRefresh: () => ref.refresh(provider.future),
         data: (article) => ListView(
-          padding: const EdgeInsets.all(Insets.lg),
+          padding: XPad.all16,
           children: [
             XCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   XText.headline(article.title),
-                  const SizedBox(height: Insets.md),
+                  XGap.v12,
                   XInfoRow('作者', article.author),
                   XInfoRow('发布时间', Fmt.dateTime(article.createdAt)),
                   XInfoRow('编号', 'NO.${article.id.padLeft(6, '0')}'),
                 ],
               ),
             ),
-            const SizedBox(height: Insets.md),
+            XGap.v12,
             XCard(child: XText.body(article.summary)),
           ],
         ),

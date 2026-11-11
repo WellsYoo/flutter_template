@@ -18,13 +18,13 @@ class _UiKitPageState extends State<UiKitPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('组件')),
       body: ListView(
-        padding: const EdgeInsets.all(Insets.lg),
+        padding: XPad.all16,
         children: [
           _Block(
             title: 'XText 文本',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: Insets.xs,
+              spacing: 4,
               children: [
                 const XText.headline('headline 18 页面标题'),
                 const XText.title('title 16 卡片标题'),
@@ -41,7 +41,7 @@ class _UiKitPageState extends State<UiKitPage> {
             title: 'XButton 按钮（返回 Future 自动 loading）',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: Insets.md,
+              spacing: 12,
               children: [
                 XButton.primary(
                   '异步提交',
@@ -57,8 +57,8 @@ class _UiKitPageState extends State<UiKitPage> {
                   },
                 ),
                 Wrap(
-                  spacing: Insets.sm,
-                  runSpacing: Insets.sm,
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
                     XButton.primary('主要', size: XButtonSize.small, onPressed: () {}),
                     XButton.outline('次要', size: XButtonSize.small, onPressed: () {}),
@@ -92,7 +92,7 @@ class _UiKitPageState extends State<UiKitPage> {
           const _Block(
             title: 'XTag 标签',
             child: Wrap(
-              spacing: Insets.sm,
+              spacing: 8,
               children: [
                 XTag('进行中'),
                 XTag('已完成', type: XTagType.success),
@@ -117,7 +117,7 @@ class _UiKitPageState extends State<UiKitPage> {
                       XTag('待审核', type: XTagType.warning),
                     ],
                   ),
-                  const SizedBox(height: Insets.sm),
+                  XGap.v8,
                   const XInfoRow('合同编号', 'HT-2025-000123'),
                   const XInfoRow('供应商', '某某建材有限公司'),
                   XInfoRow('合同金额', '¥${Fmt.money(1280000)}', valueColor: context.xColors.danger),
@@ -129,26 +129,26 @@ class _UiKitPageState extends State<UiKitPage> {
           _Block(
             title: 'XContainer 容器',
             child: Wrap(
-              spacing: Insets.md,
-              runSpacing: Insets.md,
+              spacing: 12,
+              runSpacing: 12,
               children: [
                 XContainer(
                   size: 72,
-                  radius: Radii.lg,
+                  radius: 12,
                   color: context.xColors.card,
                   alignment: Alignment.center,
                   child: const XText.caption('圆角'),
                 ),
                 const XContainer(
                   size: 72,
-                  radius: Radii.lg,
+                  radius: 12,
                   colors: [Color(0xFF4FACFE), Color(0xFF00F2FE)],
                   alignment: Alignment.center,
                   child: XText.caption('渐变', color: Colors.white),
                 ),
                 XContainer(
                   size: 72,
-                  radius: Radii.lg,
+                  radius: 12,
                   borderColor: context.colors.primary,
                   borderWidth: 1,
                   alignment: Alignment.center,
@@ -156,7 +156,7 @@ class _UiKitPageState extends State<UiKitPage> {
                 ),
                 XContainer(
                   size: 72,
-                  radius: Radii.lg,
+                  radius: 12,
                   color: context.xColors.card,
                   shadow: true,
                   alignment: Alignment.center,
@@ -184,9 +184,9 @@ class _UiKitPageState extends State<UiKitPage> {
           const _Block(
             title: 'XImage 图片',
             child: Row(
-              spacing: Insets.md,
+              spacing: 12,
               children: [
-                XImage(null, size: 64, radius: Radii.md),
+                XImage(null, size: 64, radius: 8),
                 XImage('https://invalid.example/x.png', size: 64),
                 XImage.avatar(null, size: 48),
               ],
@@ -195,8 +195,8 @@ class _UiKitPageState extends State<UiKitPage> {
           _Block(
             title: '反馈',
             child: Wrap(
-              spacing: Insets.sm,
-              runSpacing: Insets.sm,
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 _chip('XToast', () => XToast.show('这是一条提示')),
                 _chip('成功', () => XToast.success('保存成功')),
@@ -233,8 +233,8 @@ class _UiKitPageState extends State<UiKitPage> {
           _Block(
             title: 'XSheet 底部弹层',
             child: Wrap(
-              spacing: Insets.sm,
-              runSpacing: Insets.sm,
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 _chip('操作菜单', () async {
                   final i = await XSheet.actions(['拍照', '从相册选择', '删除'], danger: 2);
@@ -270,8 +270,8 @@ class _UiKitPageState extends State<UiKitPage> {
           _Block(
             title: '角标 / 步进器 / 验证码倒计时',
             child: Wrap(
-              spacing: Insets.xl,
-              runSpacing: Insets.md,
+              spacing: 24,
+              runSpacing: 12,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 const XBadge(count: 8, child: Icon(Icons.notifications_outlined)),
@@ -299,11 +299,11 @@ class _UiKitPageState extends State<UiKitPage> {
             child: Row(
               children: [
                 XSkeleton.circle(),
-                SizedBox(width: Insets.md),
+                XGap.h12,
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: Insets.sm,
+                    spacing: 8,
                     children: [XSkeleton(), XSkeleton(width: 120)],
                   ),
                 ),
@@ -339,12 +339,12 @@ class _Block extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: Insets.xl),
+      padding: const EdgeInsets.only(bottom: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           XText.secondary(title, color: context.colors.primary),
-          const SizedBox(height: Insets.sm),
+          XGap.v8,
           child,
         ],
       ),

@@ -78,7 +78,7 @@ class _FormDemoPageState extends State<FormDemoPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('表单')),
       body: ListView(
-        padding: const EdgeInsets.only(bottom: Insets.xl),
+        padding: const EdgeInsets.only(bottom: 24),
         children: [
           XFormSection(
             title: '客户信息',

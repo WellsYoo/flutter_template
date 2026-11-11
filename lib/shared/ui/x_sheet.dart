@@ -30,7 +30,7 @@ abstract final class XSheet {
         children: [
           if (title != null)
             Padding(
-              padding: const EdgeInsets.all(Insets.md),
+              padding: XPad.all12,
               child: Text(title, style: TextStyle(color: context.xColors.textHint)),
             ),
           for (var i = 0; i < actions.length; i++) ...[
@@ -41,7 +41,7 @@ abstract final class XSheet {
               onTap: () => Navigator.pop(context, i),
             ),
           ],
-          Container(height: Insets.sm, color: context.xColors.background),
+          Container(height: 8, color: context.xColors.background),
           _SheetRow(text: cancelText, onTap: () => Navigator.pop(context)),
         ],
       ),
@@ -205,7 +205,7 @@ class _SheetHeader extends StatelessWidget {
                 child: Text(
                   title ?? '',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: FontSizes.title, fontWeight: FontWeight.w500),
+                  style: const TextStyle(fontSize: FontSizes.title, fontWeight: FontWeights.medium),
                 ),
               ),
               // 没有“确定”时占位，保持标题居中

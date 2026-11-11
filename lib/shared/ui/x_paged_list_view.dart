@@ -21,8 +21,8 @@ class XPagedListView<N extends PagedNotifier<T>, T> extends ConsumerWidget {
     super.key,
     required this.provider,
     required this.itemBuilder,
-    this.separator = const SizedBox(height: Insets.md),
-    this.padding = const EdgeInsets.all(Insets.lg),
+    this.separator = XGap.v12,
+    this.padding = XPad.all16,
     this.empty = const XEmptyView(),
     this.header,
   });
@@ -113,7 +113,7 @@ class _NoMore extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: Insets.sm),
+      padding: XPad.v8,
       child: Center(
         child: Text(
           '没有更多了',

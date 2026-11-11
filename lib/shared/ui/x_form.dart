@@ -41,13 +41,13 @@ class XFormSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.xColors;
     return Padding(
-      padding: margin ?? const EdgeInsets.only(top: Insets.md),
+      padding: margin ?? const EdgeInsets.only(top: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (title != null)
             Padding(
-              padding: const EdgeInsets.fromLTRB(Insets.lg, 0, Insets.lg, Insets.sm),
+              padding: const XPad.ltrb(16, 0, 16, 8),
               child: Text(
                 title!,
                 style: TextStyle(fontSize: FontSizes.secondary, color: c.textHint),
@@ -60,7 +60,7 @@ class XFormSection extends StatelessWidget {
               child: Column(
                 children: [
                   for (var i = 0; i < children.length; i++) ...[
-                    if (i > 0 && divider) const Divider(indent: Insets.lg),
+                    if (i > 0 && divider) const Divider(indent: 16),
                     children[i],
                   ],
                 ],
@@ -171,10 +171,7 @@ class XFormItem extends StatelessWidget {
            counterText: '',
            suffixIcon: trailing == null
                ? null
-               : Padding(
-                   padding: const EdgeInsets.only(left: Insets.sm),
-                   child: trailing,
-                 ),
+               : Padding(padding: const EdgeInsets.only(left: 8), child: trailing),
            suffixIconConstraints: const BoxConstraints(),
          ),
        ));
@@ -352,11 +349,7 @@ class XFormItem extends StatelessWidget {
     Widget body = vertical
         ? Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              labelWidget,
-              const SizedBox(height: Insets.sm),
-              content,
-            ],
+            children: [labelWidget, XGap.v8, content],
           )
         : Row(
             children: [
@@ -367,10 +360,10 @@ class XFormItem extends StatelessWidget {
                   constraints: const BoxConstraints(minWidth: 88, maxWidth: 140),
                   child: labelWidget,
                 ),
-              const SizedBox(width: Insets.md),
+              XGap.h12,
               Expanded(child: content),
               if (arrow) ...[
-                const SizedBox(width: Insets.xs),
+                XGap.h4,
                 Icon(Icons.chevron_right, size: 20, color: context.xColors.textHint),
               ],
             ],
@@ -382,7 +375,7 @@ class XFormItem extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           body,
-          const SizedBox(height: Insets.xs),
+          XGap.v4,
           Text(
             help!,
             style: TextStyle(fontSize: FontSizes.caption, color: context.xColors.textHint),
@@ -401,7 +394,7 @@ class XFormItem extends StatelessWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: 52),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: Insets.lg, vertical: Insets.md),
+          padding: const XPad.hv(16, 12),
           child: Align(alignment: Alignment.centerLeft, child: body),
         ),
       ),
@@ -471,18 +464,18 @@ class _RadioGroup<T> extends StatelessWidget {
     final c = context.xColors;
     return Wrap(
       alignment: WrapAlignment.end,
-      spacing: Insets.sm,
-      runSpacing: Insets.sm,
+      spacing: 8,
+      runSpacing: 8,
       children: [
         for (final o in options)
           GestureDetector(
             onTap: () => onChanged(o),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: Insets.md, vertical: Insets.xs),
+              padding: const XPad.hv(12, 4),
               decoration: BoxDecoration(
                 color: o == value ? primary.withValues(alpha: 0.1) : c.background,
                 border: Border.all(color: o == value ? primary : Colors.transparent),
-                borderRadius: BorderRadius.circular(Radii.sm),
+                borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
                 labelOf(o),

@@ -130,7 +130,7 @@ class _ToastViewState extends State<_ToastView> {
                 children: [
                   if (widget.icon != null) ...[
                     Icon(widget.icon, color: Colors.white, size: 32),
-                    const SizedBox(height: Insets.sm),
+                    XGap.v8,
                   ],
                   Text(
                     widget.message,
@@ -156,13 +156,10 @@ class _DarkBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.black.withValues(alpha: 0.8),
-      borderRadius: BorderRadius.circular(Radii.md),
+      borderRadius: BorderRadius.circular(8),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 260, minWidth: 100),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: Insets.lg, vertical: Insets.md),
-          child: child,
-        ),
+        child: Padding(padding: const XPad.hv(16, 12), child: child),
       ),
     );
   }
@@ -201,11 +198,11 @@ abstract final class XLoading {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Padding(
-                    padding: EdgeInsets.all(Insets.sm),
+                    padding: XPad.all8,
                     child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
                   ),
                   if (message != null) ...[
-                    const SizedBox(height: Insets.sm),
+                    XGap.v8,
                     Text(message, style: const TextStyle(color: Colors.white)),
                   ],
                 ],

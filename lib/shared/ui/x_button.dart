@@ -6,9 +6,9 @@ import 'package:xjj_app_base/core/utils/context_ext.dart';
 import 'package:xjj_app_base/shared/ui/x_feedback.dart';
 
 enum XButtonSize {
-  small(32, FontSizes.secondary, Insets.md),
-  medium(40, FontSizes.body, Insets.lg),
-  large(48, FontSizes.title, Insets.xl);
+  small(32, FontSizes.secondary, 12),
+  medium(40, FontSizes.body, 16),
+  large(48, FontSizes.title, 24);
 
   const XButtonSize(this.height, this.fontSize, this.padding);
 
@@ -186,7 +186,7 @@ class _XButtonState extends State<XButton> {
       ),
       padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: size.padding)),
       textStyle: WidgetStatePropertyAll(
-        TextStyle(fontSize: size.fontSize, fontWeight: FontWeight.w500),
+        TextStyle(fontSize: size.fontSize, fontWeight: FontWeights.medium),
       ),
       // 不是胶囊形时用主题里的圆角（XTheme.create 的 radius）
       shape: widget.round ? const WidgetStatePropertyAll(StadiumBorder()) : null,
@@ -238,7 +238,7 @@ class _XButtonState extends State<XButton> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(widget.icon, size: widget.size.fontSize + 2),
-        const SizedBox(width: Insets.xs),
+        XGap.h4,
         Text(widget.label),
       ],
     );

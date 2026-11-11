@@ -49,14 +49,14 @@ class XEmptyView extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           image ?? Icon(icon, size: 64, color: hint.withValues(alpha: 0.5)),
-          const SizedBox(height: Insets.md),
+          XGap.v12,
           Text(
             message,
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: FontSizes.body, color: hint),
           ),
           if (actionText != null && onAction != null) ...[
-            const SizedBox(height: Insets.lg),
+            XGap.v16,
             XButton.outline(actionText!, size: XButtonSize.medium, width: 120, onPressed: onAction),
           ],
         ],
@@ -77,7 +77,7 @@ class XErrorView extends StatelessWidget {
     final offline = ApiException.from(error).type == ApiErrorType.network;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(Insets.xl),
+        padding: XPad.all24,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -86,14 +86,14 @@ class XErrorView extends StatelessWidget {
               size: 64,
               color: c.textHint.withValues(alpha: 0.5),
             ),
-            const SizedBox(height: Insets.md),
+            XGap.v12,
             Text(
               errorMessageOf(error),
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: FontSizes.body, color: c.textSecondary),
             ),
             if (onRetry != null) ...[
-              const SizedBox(height: Insets.lg),
+              XGap.v16,
               XButton.outline('重试', size: XButtonSize.medium, width: 120, onPressed: onRetry),
             ],
           ],

@@ -25,7 +25,7 @@ class _ArticleListPageState extends State<ArticleListPage> {
           ColoredBox(
             color: context.xColors.card,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(Insets.lg, Insets.xs, Insets.lg, Insets.sm),
+              padding: const XPad.ltrb(16, 4, 16, 8),
               child: XSearchField(
                 hintText: '搜索标题，试试输入 “1” 或 “xyz”',
                 onChanged: (v) => setState(() => _keyword = v),
@@ -65,13 +65,13 @@ class ArticleTile extends StatelessWidget {
           Row(
             children: [
               Expanded(child: XText.title(article.title, maxLines: 1)),
-              const SizedBox(width: Insets.sm),
+              XGap.h8,
               tag,
             ],
           ),
-          const SizedBox(height: Insets.xs),
+          XGap.v4,
           XText.secondary(article.summary, maxLines: 2),
-          const SizedBox(height: Insets.sm),
+          XGap.v8,
           XText.caption('${article.author} · ${Fmt.dateTime(article.createdAt)}'),
         ],
       ),

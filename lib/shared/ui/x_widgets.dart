@@ -197,7 +197,7 @@ class XStepper extends StatelessWidget {
           constraints: const BoxConstraints(minWidth: 40),
           height: 28,
           margin: const EdgeInsets.symmetric(horizontal: 2),
-          padding: const EdgeInsets.symmetric(horizontal: Insets.xs),
+          padding: XPad.h4,
           alignment: Alignment.center,
           color: c.background,
           child: Text(
@@ -357,8 +357,7 @@ class _XExpandableTextState extends State<XExpandableText> {
 /// ])
 /// ```
 class XSkeleton extends StatefulWidget {
-  const XSkeleton({super.key, this.width, this.height = 16, this.radius = Radii.sm})
-    : _circle = false;
+  const XSkeleton({super.key, this.width, this.height = 16, this.radius = 4}) : _circle = false;
 
   const XSkeleton.circle({super.key, double size = 40})
     : width = size,
