@@ -58,11 +58,16 @@ class PagedListView<N extends PagedNotifier<T>, T> extends ConsumerWidget {
             // 没有更多 / 空列表时关闭上拉，底部显示静态文案
             onLoad: state.hasMore && !state.isEmpty
                 ? () async {
-                    await notifier.loadMore();
-                    final error = ref.read(provider).value?.loadMoreError;
-                    if (error == null) return IndicatorResult.success;
-                    Toast.error(error);
-                    return IndicatorResult.fail;
+                    switch (await notifier.loadMore()) {
+                      case LoadMoreResult.loaded || LoadMoreResult.noMore:
+                        return IndicatorResult.success;
+                      case LoadMoreResult.failed:
+                        final error = ref.read(provider).value?.loadMoreError;
+                        if (error != null) Toast.error(error);
+                        return IndicatorResult.fail;
+                      case LoadMoreResult.skipped:
+                        return IndicatorResult.none;
+                    }
                   }
                 : null,
             child: state.isEmpty ? _emptyScrollable() : _list(state),

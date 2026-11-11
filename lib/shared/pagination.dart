@@ -23,9 +23,27 @@ class PagedState<T> {
   final int page;
   final bool hasMore;
   final bool loadingMore;
+
+  /// 最近一次加载更多的错误；再次加载更多或刷新成功后清空。
   final Object? loadMoreError;
 
   bool get isEmpty => items.isEmpty;
+}
+
+/// [PagedNotifier.loadMore] 的结果，列表组件据此决定底部提示。
+enum LoadMoreResult {
+  /// 加载了一页，后面还有。
+  loaded,
+
+  /// 已经没有更多（包括这次刚好加载到最后一页）。
+  noMore,
+
+  /// 请求失败，错误记在 [PagedState.loadMoreError]，已有列表不变。
+  failed,
+
+  /// 没有生效：首屏未完成、正在刷新或加载更多时被忽略，
+  /// 或请求期间列表已被刷新 / 重建，结果作废。
+  skipped,
 }
 
 /// 分页列表的通用 Notifier。子类只需实现 [fetchPage]：
@@ -56,18 +74,27 @@ abstract class PagedNotifier<T> extends AsyncNotifier<PagedState<T>> {
     return PagedState(items: result.items, page: 1, hasMore: result.hasMore);
   }
 
+  /// 每次列表被整体替换（刷新成功）加一，用来丢弃替换之前发出的加载更多结果。
+  int _generation = 0;
+  Future<void>? _refreshing;
+
   /// 下拉刷新。已有数据时刷新失败会保留旧数据并抛出异常（由调用方 toast）。
-  Future<void> refresh() async {
-    final previous = state.value;
+  /// 刷新进行中重复调用会复用同一次请求。
+  Future<void> refresh() => _refreshing ??= _refresh().whenComplete(() => _refreshing = null);
+
+  Future<void> _refresh() async {
     // provider 重建（invalidate / 依赖变化）后 ref 会换成新的；
     // 先记下当前 ref，await 之后用它判断结果是否已过期。
     final ref = this.ref;
     try {
       final next = await _loadFirstPage();
-      if (ref.mounted) state = AsyncData(next);
+      if (!ref.mounted) return;
+      _generation++; // 进行中的加载更多属于旧列表，回来后丢弃
+      state = AsyncData(next);
     } catch (e, st) {
       if (!ref.mounted) return;
-      if (previous == null || previous.isEmpty) {
+      final current = state.value;
+      if (current == null || current.isEmpty) {
         state = AsyncError(e, st);
       } else {
         rethrow;
@@ -75,46 +102,63 @@ abstract class PagedNotifier<T> extends AsyncNotifier<PagedState<T>> {
     }
   }
 
-  /// 加载下一页。重复调用、没有更多、首屏未完成时自动忽略。
-  Future<void> loadMore() async {
+  /// 加载下一页。首屏未完成、正在刷新、重复调用时忽略（返回 [LoadMoreResult.skipped]）。
+  Future<LoadMoreResult> loadMore() async {
     final current = state.value;
-    if (current == null || state.isLoading || current.loadingMore || !current.hasMore) return;
+    if (current == null ||
+        state.isLoading ||
+        state.hasError ||
+        _refreshing != null ||
+        current.loadingMore) {
+      return LoadMoreResult.skipped;
+    }
+    if (!current.hasMore) return LoadMoreResult.noMore;
 
     final ref = this.ref; // 同 refresh
+    final generation = _generation;
+    bool stale() => !ref.mounted || generation != _generation;
+
     state = AsyncData(_copy(current, loadingMore: true));
     try {
       final result = await fetchPage(current.page + 1);
-      if (!ref.mounted) return;
+      if (stale()) return LoadMoreResult.skipped;
+      // 以最新的列表为准追加：请求期间可能调用过 updateItems
       state = AsyncData(
         PagedState(
-          items: [...current.items, ...result.items],
+          items: [...state.requireValue.items, ...result.items],
           page: current.page + 1,
           hasMore: result.hasMore,
         ),
       );
+      return result.hasMore ? LoadMoreResult.loaded : LoadMoreResult.noMore;
     } catch (e) {
-      if (!ref.mounted) return;
-      state = AsyncData(_copy(current, loadMoreError: e));
+      if (stale()) return LoadMoreResult.skipped;
+      state = AsyncData(_copy(state.requireValue, loadMoreError: e));
+      return LoadMoreResult.failed;
     }
   }
 
-  /// 本地增删改后直接更新列表，不用重新请求。
+  /// 本地增删改后直接更新列表，不用重新请求。加载更多进行中也可以调用。
   void updateItems(List<T> Function(List<T> items) update) {
     final current = state.value;
     if (current == null) return;
-    state = AsyncData(_copy(current, items: update(current.items)));
+    state = AsyncData(
+      PagedState(
+        items: update(current.items),
+        page: current.page,
+        hasMore: current.hasMore,
+        loadingMore: current.loadingMore,
+        loadMoreError: current.loadMoreError,
+      ),
+    );
   }
 
-  PagedState<T> _copy(
-    PagedState<T> s, {
-    List<T>? items,
-    bool loadingMore = false,
-    Object? loadMoreError,
-  }) => PagedState(
-    items: items ?? s.items,
-    page: s.page,
-    hasMore: s.hasMore,
-    loadingMore: loadingMore,
-    loadMoreError: loadMoreError,
-  );
+  PagedState<T> _copy(PagedState<T> s, {bool loadingMore = false, Object? loadMoreError}) =>
+      PagedState(
+        items: s.items,
+        page: s.page,
+        hasMore: s.hasMore,
+        loadingMore: loadingMore,
+        loadMoreError: loadMoreError,
+      );
 }

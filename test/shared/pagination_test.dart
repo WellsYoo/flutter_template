@@ -127,6 +127,80 @@ void main() {
     expect(current().loadingMore, isFalse);
   });
 
+  test('loadMore 返回结果：loaded / noMore / failed', () async {
+    await container.read(_provider.future);
+    final notifier = container.read(_provider.notifier);
+
+    expect(await notifier.loadMore(), LoadMoreResult.loaded);
+    source.failNext = true;
+    expect(await notifier.loadMore(), LoadMoreResult.failed);
+    expect(await notifier.loadMore(), LoadMoreResult.noMore); // 第 3 页是最后一页
+    expect(await notifier.loadMore(), LoadMoreResult.noMore);
+    expect(source.requestedPages, [1, 2, 3, 3]);
+  });
+
+  test('加载更多期间刷新成功，旧的下一页结果不会追加到新列表', () async {
+    await container.read(_provider.future);
+    final notifier = container.read(_provider.notifier);
+
+    final slow = source.gate = Completer<void>();
+    final pending = notifier.loadMore(); // 请求第 2 页，卡住
+    await notifier.refresh();
+    expect(current().loadingMore, isFalse);
+
+    slow.complete(); // 旧的第 2 页回来了
+    expect(await pending, LoadMoreResult.skipped);
+    expect(current().items.length, 10);
+    expect(current().page, 1);
+
+    expect(await notifier.loadMore(), LoadMoreResult.loaded);
+    expect(current().items, List.generate(20, (i) => i));
+  });
+
+  test('加载更多期间刷新失败，加载更多照常生效', () async {
+    await container.read(_provider.future);
+    final notifier = container.read(_provider.notifier);
+
+    final slow = source.gate = Completer<void>();
+    final pending = notifier.loadMore();
+    source.failNext = true;
+    await expectLater(notifier.refresh(), throwsException);
+
+    slow.complete();
+    expect(await pending, LoadMoreResult.loaded);
+    expect(current().items.length, 20);
+  });
+
+  test('刷新期间不加载更多，重复刷新只发一次请求', () async {
+    await container.read(_provider.future);
+    final notifier = container.read(_provider.notifier);
+
+    final slow = source.gate = Completer<void>();
+    final first = notifier.refresh();
+    final second = notifier.refresh();
+    expect(await notifier.loadMore(), LoadMoreResult.skipped);
+
+    slow.complete();
+    await Future.wait([first, second]);
+    expect(source.requestedPages, [1, 1]);
+    expect(current().items.length, 10);
+  });
+
+  test('加载更多期间 updateItems 的修改不会丢', () async {
+    await container.read(_provider.future);
+    final notifier = container.read(_provider.notifier);
+
+    final slow = source.gate = Completer<void>();
+    final pending = notifier.loadMore();
+    notifier.updateItems((items) => items.sublist(1)); // 删掉第一条
+    expect(current().loadingMore, isTrue);
+
+    slow.complete();
+    await pending;
+    expect(current().items, List.generate(19, (i) => i + 1));
+    expect(current().loadingMore, isFalse);
+  });
+
   test('首屏失败进入 error 状态', () async {
     source.failNext = true;
     await expectLater(container.read(_provider.future), throwsException);
