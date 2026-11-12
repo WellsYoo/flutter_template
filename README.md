@@ -14,6 +14,16 @@ intl               日期数字格式化
 开箱即有：登录/退出与 401 自动登出、底部导航、分页列表（下拉刷新 + 上拉加载 + 空/错状态）、
 详情页、表单、亮/暗主题、统一异常处理、toast/loading/弹窗/底部弹层、多环境配置、测试。
 
+| 想做什么 | 看哪里 |
+| --- | --- |
+| 跑起来 | [运行](#运行) |
+| 了解代码怎么组织、启动和登录怎么串起来 | [目录](#目录)、[基础能力](#基础能力) |
+| 写一个新页面 / 新模块 | [新增一个业务模块](#新增一个业务模块)、[常用场景速查](#常用场景速查)、[约定](#约定) |
+| 查组件和工具怎么用 | [UI 组件](#ui-组件)、[工具类](#工具类) |
+| 写测试、打包、CI | [测试](#测试)、[多环境](#多环境)、[打包](#打包)、[CI](#ci) |
+| 基于模板开新项目 | [用模板创建新项目](#用模板创建新项目)、[刻意没有包含的](#刻意没有包含的) |
+| 从旧版 xjj_app_base 迁移 | [附：和旧版组件的对应](#附和旧版-xjj_app_base-组件的对应) |
+
 ## 运行
 
 ```bash
@@ -96,7 +106,8 @@ darkTheme: XTheme.create(
 
 ## 工具类
 
-除 `json.dart`、`ref_ext.dart` 外都已由 `ui.dart` 导出。
+格式化、扩展方法、校验、防抖节流已由 `ui.dart` 导出，页面里不用再单独 import；
+其余几个在各自的文件里，表格中标了路径。
 
 | 工具 | 用途 | 示例 |
 | --- | --- | --- |
@@ -107,36 +118,10 @@ darkTheme: XTheme.create(
 | `JsonX`（`core/utils/json.dart`） | 手写 `fromJson` 时宽松取值，类型不符返回默认值不抛异常 | `json.str('id')` `.integer` `.number` `.boolean` `.date` `.obj` `.list` `.listOf<String>` |
 | `Validators` / `InputFormats` | 校验 / 输入限制 | `Validators.required` `.phone` `.email` `.url` `.length` `.idCard`；`InputFormats.decimal(2)` `.phone` `.idCard` `.digits` |
 | `Debouncer` / `Throttler` | 防抖 / 节流 | `_debouncer(() => _search(v))` |
-| `LocalStorage` 扩展 | 存取 bool / int / double / JSON / 模型 | `storage.setBool(key, true)` `storage.getObject(key, User.fromJson)` |
-| `ref.cancelToken()` | provider 释放时取消请求 | 见 `features/article/article_providers.dart` |
+| `Log`（`core/utils/logger.dart`） | 日志，release 包不输出 | `Log.d('xxx')` `Log.e('失败', error: e, stackTrace: st)` |
+| `LocalStorage` 扩展（`core/storage/local_storage.dart`） | 存取 bool / int / double / JSON / 模型 | `storage.setBool(key, true)` `storage.getObject(key, User.fromJson)` |
+| `ref.cancelToken()`（`core/network/api_client.dart`） | provider 释放时取消请求 | 见 `features/article/article_providers.dart` |
 | `ref.cacheFor()`（`core/utils/ref_ext.dart`） | autoDispose 的 provider 离开页面后再缓存一段时间 | `ref.cacheFor(const Duration(minutes: 5))` |
-
-### 和旧版 xjj_app_base 组件的对应
-
-| 旧 | 新 |
-| --- | --- |
-| `ScreenText.title / subTitle / content / weak` | `XText.title / body / secondary / caption` |
-| `context.colorStyle.textBiz / textSubBiz / dividerLine` | `context.xColors.text / textHint / divider` |
-| `context.sizeStyle.hSpacingStandard`、`ScreenSpacer`、`ScreenPadding` | `XGap.v16` / `XGap.h16`、`XPad.all16` |
-| `ScreenButton.text / ScreenOutlineButton.text` | `XButton.primary / XButton.outline` |
-| `ScreenBottomBar` + `ScreenBottomButton` | `XBottomBar` + `XButton` |
-| `ScreenSettingItem.choose / inputText / inputMultiLine / operateSwitch / radio / view` | `XFormItem.select / input / textarea / switcher / radio / text` |
-| `ScreenSettingItem.inputRMB / inputDouble` | `XFormItem.input(inputFormatters: [InputFormats.decimal(2)], suffix: '元')` |
-| `ScreenSettingContainer`、`ScreenSettingTitle` | `XFormSection(title: ...)` |
-| `ItemTextRow` | `XInfoRow` |
-| `ScreenContainer.round`、`ScreenInkWellContainer` | `XCard` |
-| `ScreenNetImage / ScreenNormalImage` | `XImage`（网络图和 asset 同一个入口） |
-| `MyEasyRefresh` | `XPagedListView` / `XRefresh` |
-| `MyNoDataWidget`、`MyErrorWidget` | `XEmptyView`、`XErrorView` |
-| `MyToastUtil.showToast / showLoading / showSuccess` | `XToast.show / XLoading.run / XToast.success` |
-| `MyDialogUtil.showConfirm / showTip` | `XDialog.confirm / alert` |
-| `MyDrawerUtil.showBottomOption / showBottomRadioList / showBottomWheel` | `XSheet.actions / select / custom` |
-| 日期选择相关 widget | `XSheet.date` |
-| `MySearchBar` | `XSearchField` |
-| `MyBaseState`、`MyBaseBody`、`MyOriginBody` | `Scaffold` + `XAsyncView`（加载 / 失败 / 重试由 Riverpod 状态驱动） |
-
-没有迁移的：日历、步进器、锚点、气泡菜单、截图分享、图片预览、WebView、视频、微信。
-这些依赖重或使用面窄，项目用到时再加，可以参考 `.legacy-backup/`（本地备份，不入库）或 git 历史。
 
 ## 常用场景速查
 
@@ -189,6 +174,38 @@ lib/
 
 依赖方向：`features → shared → core`，`app` 组装所有模块。feature 之间不互相引用。
 
+## 基础能力
+
+模板已经串好的几条主线，改之前先知道它们在哪。
+
+**启动**（`main.dart`）：注册全局异常兜底 → 初始化本地存储 → 通过 `ProviderScope` 的 override 注入 → `App`。
+启动前还要异步准备别的东西（读配置、初始化 SDK），照 `localStorageProvider` 的写法加。
+
+**登录与会话**（`core/session/session.dart`）：
+
+- 登录成功调 `ref.read(sessionProvider.notifier).signIn(token)`，退出调 `signOut()`。token 存本地，下次启动自动恢复。
+- 页面不用自己跳转：路由守卫监听会话，未登录一律去登录页，登录后回到原来要去的页面。
+- 接口返回 401（HTTP 状态码，或 `ApiEnvelope.unauthorizedCodes` 里的业务码）自动登出。
+  只认“当前 token”发出的请求，旧账号的慢请求不会把新登录的账号踢掉。
+- 要缓存用户信息，在 `Session` 里加字段。
+
+**路由**（`app/routes.dart` 定义路径，`app/router.dart` 注册页面）：
+
+- 带底部导航的页面放在 `StatefulShellRoute` 的 branch 里，每个 tab 有独立的导航栈。
+  加 tab：`router.dart` 加一个 branch，`features/home/home_shell.dart` 加一个 destination。
+- tab 内的二级页面写成子路由，保留底部导航；要盖住底部导航的全屏页放在 shell 外面，
+  或给子路由加 `parentNavigatorKey: rootNavigatorKey`。
+- 路径没匹配上显示 `NotFoundPage`。
+
+**网络**（`core/network/`）：`dioProvider` 负责 baseUrl、超时、带 token、debug 日志；
+`ApiClient` 负责拆包和统一异常。要加公共请求头、签名、token 刷新，在 `dioProvider` 里加拦截器。
+
+**全局 UI 行为**（`app/app.dart`）：亮 / 暗主题和主题模式（`themeModeProvider`，持久化）、
+中文组件文案、系统字体缩放上限 1.3 倍、点击空白处收起键盘。
+
+**日志与崩溃上报**：`Log.d` / `Log.e` 只在 debug / profile 输出。接入 Sentry、Bugly 等，
+改 `main.dart` 里的两个全局异常回调和 `Log.e`。
+
 ## 新增一个业务模块
 
 以 `order` 为例，照着 `features/article` 抄：
@@ -233,6 +250,34 @@ lib/
 - **本地存储**：key 统一加到 `StorageKeys`。
 - **测试**：Repository 都有接口，测试里用 `overrideWithValue` 换成假实现，见 `test/`。
 
+## 测试
+
+```bash
+fvm flutter test                               # 全部
+fvm flutter test test/shared/pagination_test.dart
+```
+
+```
+test/
+├── app_test.dart          整体流程：登录 → 首页 → 详情 → 退出，404
+├── demo_list_test.dart    列表各状态在页面上的表现
+├── core/                  ApiClient、会话、工具类
+├── shared/                分页逻辑、UI 组件
+└── features/              业务模块，目录和 lib/features 对应
+```
+
+不依赖真实后端和设备，靠 override 换掉外部依赖：
+
+| 要换掉的 | 用什么 |
+| --- | --- |
+| 本地存储 | `localStorageProvider.overrideWithValue(MemoryStorage({...}))` |
+| 接口数据 | Repository 的假实现：`articleRepositoryProvider.overrideWithValue(FakeArticleRepository(delay: Duration.zero))` |
+| HTTP 响应（测 `ApiClient` 本身） | 自定义 `HttpClientAdapter`，见 `test/core/api_client_test.dart` |
+| 当前时间 | `Fmt.timeAgo(t, now: ...)` 传入固定时间 |
+
+纯逻辑用 `ProviderContainer.test(overrides: [...])`，页面用 `ProviderScope(overrides: [...], child: ...)`，
+写法见 `test/core/session_test.dart` 和 `test/app_test.dart`。
+
 ## 多环境
 
 `env/dev.json`、`env/prod.json` 通过 `--dart-define-from-file` 注入，在 `AppConfig`（`core/config/app_config.dart`）里读取。
@@ -269,13 +314,28 @@ fvm dart format lib test && fvm flutter analyze && fvm flutter test
 
 ## 用模板创建新项目
 
-1. 复制仓库，删除 `.git`。
-2. 改包名：`pubspec.yaml` 的 `name`，然后全局替换 `package:xjj_app_base/` 为新名字。
-3. 改应用 ID / 名称：
-   - Android：`android/app/build.gradle.kts` 的 `applicationId`、`namespace`，`AndroidManifest.xml` 的 `android:label`
-   - iOS：Xcode 里的 Bundle Identifier，`Info.plist` 的 `CFBundleDisplayName`
-4. 把 `authRepositoryProvider`、`articleRepositoryProvider` 换成真实实现。
-5. 删掉示例：`features/demo/` 目录，以及 `routes.dart`、`router.dart`、`home_shell.dart` 里对应的 demo 路由和 tab。
+1. **复制仓库**，删除 `.git` 后重新 `git init`。
+2. **改包名**：`pubspec.yaml` 的 `name` 和 `description`，然后全局替换 `package:xjj_app_base/` 为新名字
+   （`lib/` 和 `test/` 都要换）。
+3. **改应用名称**：
+   - `lib/app/app.dart` 的 `title`
+   - Android：`android/app/src/main/AndroidManifest.xml` 的 `android:label`
+   - iOS：`ios/Runner/Info.plist` 的 `CFBundleDisplayName`、`CFBundleName`
+4. **改应用 ID**：
+   - Android：`android/app/build.gradle.kts` 的 `applicationId`、`namespace`；
+     `MainActivity.kt` 的 `package` 和它所在的目录要跟 `namespace` 一致
+   - iOS：Xcode 里 Runner 和 RunnerTests 的 Bundle Identifier（现在是 `com.xjjchain.xjjAppBase`）
+5. **换图标和启动图**：Android 的 `res/mipmap-*`、`res/drawable*/launch_background.xml`，
+   iOS 的 `Assets.xcassets`。
+6. **配后端**：`env/dev.json`、`env/prod.json` 填接口地址；响应格式或成功码不是
+   `{code: 0, msg, data}` 的改 `ApiEnvelope`。
+7. **接真实接口**：把 `authRepositoryProvider`、`articleRepositoryProvider` 换成真实实现。
+8. **删示例**：`features/demo/` 目录，以及 `routes.dart`、`router.dart`、`home_shell.dart` 里对应的
+   demo 路由和 tab，`test/demo_list_test.dart`。`features/article/` 留着当参考，有了自己的模块再删。
+9. **配签名**：见[打包](#打包)。
+10. **清理文档**：README 里“附：和旧版组件的对应”一节，按需更新 `LICENSE`。
+
+改完跑一遍 `fvm flutter analyze && fvm flutter test` 确认没有漏改的地方。
 
 ## 刻意没有包含的
 
@@ -290,3 +350,32 @@ fvm dart format lib test && fvm flutter analyze && fvm flutter test
 - **http 明文请求**：Android 9+ / iOS 默认禁止。测试环境只有 http 时再按平台单独放开，不要带到正式包。
 - **安全存储**：token 目前存在 SharedPreferences。安全要求高时把 `PrefsStorage` 换成 flutter_secure_storage 实现，接口不变。
 - **国际化**：已接入 Flutter 自带的中文组件文案。需要多语言时启用 `flutter gen-l10n`。
+
+## 附：和旧版 xjj_app_base 组件的对应
+
+新项目用不到这一节，可以删掉。
+
+| 旧 | 新 |
+| --- | --- |
+| `ScreenText.title / subTitle / content / weak` | `XText.title / body / secondary / caption` |
+| `context.colorStyle.textBiz / textSubBiz / dividerLine` | `context.xColors.text / textHint / divider` |
+| `context.sizeStyle.hSpacingStandard`、`ScreenSpacer`、`ScreenPadding` | `XGap.v16` / `XGap.h16`、`XPad.all16` |
+| `ScreenButton.text / ScreenOutlineButton.text` | `XButton.primary / XButton.outline` |
+| `ScreenBottomBar` + `ScreenBottomButton` | `XBottomBar` + `XButton` |
+| `ScreenSettingItem.choose / inputText / inputMultiLine / operateSwitch / radio / view` | `XFormItem.select / input / textarea / switcher / radio / text` |
+| `ScreenSettingItem.inputRMB / inputDouble` | `XFormItem.input(inputFormatters: [InputFormats.decimal(2)], suffix: '元')` |
+| `ScreenSettingContainer`、`ScreenSettingTitle` | `XFormSection(title: ...)` |
+| `ItemTextRow` | `XInfoRow` |
+| `ScreenContainer.round`、`ScreenInkWellContainer` | `XCard` |
+| `ScreenNetImage / ScreenNormalImage` | `XImage`（网络图和 asset 同一个入口） |
+| `MyEasyRefresh` | `XPagedListView` / `XRefresh` |
+| `MyNoDataWidget`、`MyErrorWidget` | `XEmptyView`、`XErrorView` |
+| `MyToastUtil.showToast / showLoading / showSuccess` | `XToast.show / XLoading.run / XToast.success` |
+| `MyDialogUtil.showConfirm / showTip` | `XDialog.confirm / alert` |
+| `MyDrawerUtil.showBottomOption / showBottomRadioList / showBottomWheel` | `XSheet.actions / select / custom` |
+| 日期选择相关 widget | `XSheet.date` |
+| `MySearchBar` | `XSearchField` |
+| `MyBaseState`、`MyBaseBody`、`MyOriginBody` | `Scaffold` + `XAsyncView`（加载 / 失败 / 重试由 Riverpod 状态驱动） |
+
+没有迁移的：日历、锚点、气泡菜单、截图分享、图片预览、WebView、视频、微信。
+这些依赖重或使用面窄，项目用到时再加，可以参考 `.legacy-backup/`（本地备份，不入库）或 git 历史。
