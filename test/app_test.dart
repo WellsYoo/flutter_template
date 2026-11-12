@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xjj_app_base/app/app.dart';
+import 'package:xjj_app_base/app/router.dart';
 import 'package:xjj_app_base/core/storage/local_storage.dart';
 import 'package:xjj_app_base/features/article/data/article_repository.dart';
 
@@ -57,5 +58,23 @@ void main() {
     await tester.pumpWidget(_app(MemoryStorage({StorageKeys.token: 't'})));
     await tester.pumpAndSettle();
     expect(find.text('示例文章 #1'), findsOneWidget);
+  });
+
+  testWidgets('路径不存在或参数非法：显示 404，可以返回首页', (tester) async {
+    await tester.pumpWidget(_app(MemoryStorage({StorageKeys.token: 't'})));
+    await tester.pumpAndSettle();
+    final router = ProviderScope.containerOf(tester.element(find.byType(App))).read(routerProvider);
+
+    router.go('/no-such-page');
+    await tester.pumpAndSettle();
+    expect(find.text('页面不存在或已失效'), findsOneWidget);
+
+    await tester.tap(find.text('返回首页'));
+    await tester.pumpAndSettle();
+    expect(find.text('示例文章 #1'), findsOneWidget);
+
+    router.go('/demo/list/not-a-scenario');
+    await tester.pumpAndSettle();
+    expect(find.text('页面不存在或已失效'), findsOneWidget);
   });
 }

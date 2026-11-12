@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:xjj_app_base/core/network/api_exception.dart';
 import 'package:xjj_app_base/core/theme/x_theme.dart';
 import 'package:xjj_app_base/core/utils/context_ext.dart';
+import 'package:xjj_app_base/core/utils/logger.dart';
 
 /// 根 Navigator 的 key，让 toast、弹窗、底部弹层在任何地方都能调用（包括 Notifier 里）。
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -66,6 +67,10 @@ abstract final class XToast {
   static void error(Object error) {
     final e = ApiException.from(error);
     if (e.type == ApiErrorType.cancel) return;
+    // 接口异常有明确文案；其他异常多是代码 bug，提示之外还要留日志，否则问题被吞掉
+    if (error is! ApiException) {
+      Log.e('未预期的异常', error: error, tag: 'UI');
+    }
     show(e.message, icon: Icons.error_outline);
   }
 }

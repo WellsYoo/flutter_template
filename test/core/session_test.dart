@@ -28,4 +28,26 @@ void main() {
     expect(container.read(sessionProvider).isLoggedIn, isFalse);
     expect(storage.getString(StorageKeys.token), isNull);
   });
+
+  test('signOut：存储写失败也会退出登录', () async {
+    final container = ProviderContainer.test(
+      overrides: [localStorageProvider.overrideWithValue(_BrokenStorage())],
+    );
+    expect(container.read(sessionProvider).isLoggedIn, isTrue);
+
+    await expectLater(container.read(sessionProvider.notifier).signOut(), throwsStateError);
+    expect(container.read(sessionProvider).isLoggedIn, isFalse);
+  });
+}
+
+/// 读得到 token，但写入 / 删除都失败
+class _BrokenStorage implements LocalStorage {
+  @override
+  String? getString(String key) => 'abc';
+
+  @override
+  Future<void> setString(String key, String value) async => throw StateError('disk full');
+
+  @override
+  Future<void> remove(String key) async => throw StateError('disk full');
 }

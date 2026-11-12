@@ -27,7 +27,8 @@ class SessionNotifier extends Notifier<Session> {
   /// 主动退出，或 token 失效（401）时调用。
   Future<void> signOut() async {
     if (!state.isLoggedIn) return;
-    await _storage.remove(StorageKeys.token);
+    // 先清状态（路由守卫立即跳登录页），再清存储：存储写失败也不该让用户停在已登录状态
     state = const Session();
+    await _storage.remove(StorageKeys.token);
   }
 }

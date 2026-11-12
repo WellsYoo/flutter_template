@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:xjj_app_base/app/app_config.dart';
+import 'package:xjj_app_base/core/config/app_config.dart';
 import 'package:xjj_app_base/core/session/session.dart';
 import 'package:xjj_app_base/core/theme/theme_mode.dart';
 import 'package:xjj_app_base/shared/ui/ui.dart';

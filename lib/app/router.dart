@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:xjj_app_base/app/not_found_page.dart';
 import 'package:xjj_app_base/app/routes.dart';
 import 'package:xjj_app_base/core/session/session.dart';
 import 'package:xjj_app_base/features/article/presentation/article_detail_page.dart';
@@ -24,6 +25,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: Routes.home,
     debugLogDiagnostics: kDebugMode,
     refreshListenable: sessionChanged,
+    // 没有匹配的路由（链接失效、路径写错）
+    errorBuilder: (_, _) => const NotFoundPage(),
     redirect: (context, state) {
       final loggedIn = ref.read(sessionProvider).isLoggedIn;
       final atLogin = state.matchedLocation == Routes.login;
@@ -55,9 +58,14 @@ final routerProvider = Provider<GoRouter>((ref) {
                 routes: [
                   GoRoute(
                     path: 'list/:scenario',
-                    builder: (_, state) => DemoListPage(
-                      scenario: ListScenario.values.byName(state.pathParameters['scenario']!),
-                    ),
+                    // 路径参数可能来自外部链接，非法值显示 404，不要抛异常
+                    builder: (_, state) {
+                      final scenario = ListScenario.values
+                          .asNameMap()[state.pathParameters['scenario']];
+                      return scenario == null
+                          ? const NotFoundPage()
+                          : DemoListPage(scenario: scenario);
+                    },
                   ),
                   GoRoute(path: 'ui', builder: (_, _) => const UiKitPage()),
                   // 页面自带底部操作栏：挂到根 Navigator，盖住底部导航

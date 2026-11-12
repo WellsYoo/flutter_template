@@ -168,8 +168,9 @@ darkTheme: XTheme.create(
 ```
 lib/
 ├── main.dart              启动：初始化存储、全局异常、ProviderScope
-├── app/                   组装层：App、路由表、环境配置（只有这里引用各 feature）
+├── app/                   组装层：App、路由表、404 页（只有这里引用各 feature）
 ├── core/                  与业务无关的基础设施
+│   ├── config/            AppConfig 环境配置
 │   ├── network/           ApiClient（拆包、异常、401）、ApiException
 │   ├── session/           登录会话（token）
 │   ├── storage/           LocalStorage 接口 + 实现
@@ -221,21 +222,49 @@ lib/
 
 - **网络**：只通过 `ApiClient` 调接口。它负责拆 `{code, msg, data}`、把所有错误转成 `ApiException`、
   遇到 401 自动登出。后端字段名或成功码不同，改 `ApiEnvelope`。
+  上传文件把 `FormData` 作为 `data` 传给 `post` 即可。
 - **错误提示**：`XToast.error(e)` 或 `errorMessageOf(e)`，不要自己拼错误文案。
+  非接口异常（一般是代码 bug）提示“数据异常”的同时会打日志，调试时留意控制台。
 - **按钮 loading**：`XButton` 的 `onPressed` 返回 Future 就会转圈。只有“等接口”才返回 Future；
   弹确认框这类等用户操作的，写成 `() => unawaited(_confirm())`。
 - **跳转**：`context.push(Routes.xxx)`，不手写路径字符串。登录态变化不需要手动跳转，路由守卫会处理。
+  路径没匹配上显示 `NotFoundPage`；路径参数要做合法性判断，非法时也返回它，不要抛异常。
 - **样式**：用 `XText`、`context.xColors`，不写裸色值；间距用 `XGap` / `XPad`，数值按设计稿填。
 - **本地存储**：key 统一加到 `StorageKeys`。
 - **测试**：Repository 都有接口，测试里用 `overrideWithValue` 换成假实现，见 `test/`。
 
 ## 多环境
 
-`env/dev.json`、`env/prod.json` 通过 `--dart-define-from-file` 注入，在 `AppConfig` 里读取。
+`env/dev.json`、`env/prod.json` 通过 `--dart-define-from-file` 注入，在 `AppConfig`（`core/config/app_config.dart`）里读取。
 加配置项：json 里加 key，`AppConfig` 里加一行 `String.fromEnvironment`。
+
+不带 `--dart-define-from-file` 时默认是 dev 环境，打正式包不要漏掉这个参数。
+
+## 打包
 
 ```bash
 fvm flutter build apk --release --dart-define-from-file=env/prod.json
+fvm flutter build ipa --release --dart-define-from-file=env/prod.json
+```
+
+Android 正式签名：把 keystore 放到 `android/` 下，新建 `android/key.properties`（已在 .gitignore，不要提交）：
+
+```properties
+storeFile=release.jks
+storePassword=***
+keyAlias=***
+keyPassword=***
+```
+
+`storeFile` 相对 `android/` 目录。没有这个文件时 release 包用 debug 签名，只能本机调试，不能上架。
+
+## CI
+
+`.github/workflows/ci.yml`：push 到 main 和提 PR 时检查格式、静态分析、跑测试。
+Flutter 版本读 `.fvm/fvm_config.json`。提交前本地可以先跑：
+
+```bash
+fvm dart format lib test && fvm flutter analyze && fvm flutter test
 ```
 
 ## 用模板创建新项目
@@ -256,5 +285,8 @@ fvm flutter build apk --release --dart-define-from-file=env/prod.json
 - **屏幕适配**（flutter_screenutil）：优先用弹性布局；设计稿必须等比还原时再加。
 - **网络图片磁盘缓存**（cached_network_image）：只需改 `XImage` 一个文件。
 - **图片选择**、**WebView**、**视频**、**微信 SDK** 等：项目用到时再加。
+- **token 刷新**：现在是 401 直接登出。后端有 refresh token 时，在 `dioProvider` 里加拦截器（推荐 `QueuedInterceptor`，并发 401 只刷新一次）。
+- **横竖屏**：没有锁定方向。只支持竖屏的话，在 `main()` 里调 `SystemChrome.setPreferredOrientations`，并删掉 `Info.plist` 里的横屏项。
+- **http 明文请求**：Android 9+ / iOS 默认禁止。测试环境只有 http 时再按平台单独放开，不要带到正式包。
 - **安全存储**：token 目前存在 SharedPreferences。安全要求高时把 `PrefsStorage` 换成 flutter_secure_storage 实现，接口不变。
 - **国际化**：已接入 Flutter 自带的中文组件文案。需要多语言时启用 `flutter gen-l10n`。

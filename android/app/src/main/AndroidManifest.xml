@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 访问网络。debug / profile 清单里的那条只对调试包生效，正式包必须在这里声明 -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="xjj_app_base"
         android:name="${applicationName}"

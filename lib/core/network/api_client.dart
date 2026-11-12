@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:xjj_app_base/app/app_config.dart';
+import 'package:xjj_app_base/core/config/app_config.dart';
 import 'package:xjj_app_base/core/network/api_exception.dart';
 import 'package:xjj_app_base/core/session/session.dart';
 import 'package:xjj_app_base/core/utils/logger.dart';
@@ -85,6 +85,15 @@ abstract final class ApiEnvelope {
 /// final user = await api.get('/user/me', decode: (d) => User.fromJson(d! as Map<String, dynamic>));
 /// ```
 ///
+/// 上传文件直接把 `FormData` 作为 data：
+///
+/// ```dart
+/// final url = await api.post<String>(
+///   '/upload',
+///   data: FormData.fromMap({'file': await MultipartFile.fromFile(path)}),
+/// );
+/// ```
+///
 /// 失败一律抛 [ApiException]。传 [CancelToken]（一般用 `ref.cancelToken()`）可以中途取消，
 /// 取消时抛出 type 为 [ApiErrorType.cancel] 的异常，`XToast.error` 不会提示它。
 class ApiClient {
@@ -126,6 +135,21 @@ class ApiClient {
   }) => _request(
     path,
     method: 'PUT',
+    data: data,
+    query: query,
+    cancelToken: cancelToken,
+    decode: decode,
+  );
+
+  Future<T> patch<T>(
+    String path, {
+    Object? data,
+    Map<String, dynamic>? query,
+    CancelToken? cancelToken,
+    Decoder<T>? decode,
+  }) => _request(
+    path,
+    method: 'PATCH',
     data: data,
     query: query,
     cancelToken: cancelToken,
