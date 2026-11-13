@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xjj_app_base/core/network/api_client.dart';
+import 'package:xjj_app_base/core/network/api_exception.dart';
 import 'package:xjj_app_base/features/article/data/article.dart';
 import 'package:xjj_app_base/shared/pagination.dart';
 
@@ -78,7 +79,12 @@ class FakeArticleRepository implements ArticleRepository {
   @override
   Future<Article> fetchDetail(String id, {CancelToken? cancelToken}) async {
     await Future<void>.delayed(delay);
-    return _article(int.parse(id));
+    // id 来自路由参数，可能是任意内容：像真实后端一样返回“不存在”，而不是让解析抛异常
+    final i = int.tryParse(id);
+    if (i == null || i < 0 || i >= total) {
+      throw const ApiException(ApiErrorType.business, '文章不存在');
+    }
+    return _article(i);
   }
 
   Article _article(int i) => Article(

@@ -5,7 +5,8 @@ import 'package:xjj_app_base/features/article/article_providers.dart';
 import 'package:xjj_app_base/features/article/data/article.dart';
 import 'package:xjj_app_base/shared/ui/ui.dart';
 
-/// 标准列表页：搜索 + 下拉刷新 + 上拉加载 + 空状态 + 错误重试。
+/// 文章列表：搜索 + 下拉刷新 + 上拉加载 + 空状态 + 错误重试。
+/// 搜索词变化就是一个新的 provider，旧请求自动取消、结果自动丢弃。
 class ArticleListPage extends StatefulWidget {
   const ArticleListPage({super.key});
 
@@ -19,13 +20,13 @@ class _ArticleListPageState extends State<ArticleListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('首页')),
+      appBar: AppBar(title: const Text('文章')),
       body: Column(
         children: [
           ColoredBox(
             color: context.xColors.card,
             child: Padding(
-              padding: const XPad.ltrb(16, 4, 16, 8),
+              padding: const XPad.ltrb(16, 4, 16, 10),
               child: XSearchField(
                 hintText: '搜索标题，试试输入 “1” 或 “xyz”',
                 onChanged: (v) => setState(() => _keyword = v),

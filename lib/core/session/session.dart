@@ -8,6 +8,9 @@ class Session {
   final String? token;
 
   bool get isLoggedIn => token != null && token!.isNotEmpty;
+
+  /// 演示用：假 token 里带着用户名。接真实后端后，把用户信息作为字段存进来。
+  String get displayName => token?.replaceFirst('fake-token-', '') ?? '';
 }
 
 /// 全局会话状态。路由守卫、网络层 token 注入都依赖它。

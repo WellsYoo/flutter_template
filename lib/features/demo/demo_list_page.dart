@@ -6,16 +6,17 @@ import 'package:xjj_app_base/shared/ui/x_paged_list_view.dart';
 
 /// 列表的各种状态场景，用来演示和手动验证 XPagedListView 的表现。
 enum ListScenario {
-  normal('正常分页', '共 35 条，下拉刷新，上拉加载更多'),
-  empty('空数据', '首屏返回 0 条，下拉刷新后有数据'),
-  firstPageError('首屏失败', '首次加载失败，点“重试”后成功'),
-  loadMoreError('加载更多失败', '第 2 页第一次失败，再次上拉成功'),
-  refreshError('刷新失败', '下拉刷新失败：保留旧数据并提示');
+  normal('正常分页', '共 35 条，下拉刷新，上拉加载更多', Icons.view_agenda_outlined),
+  empty('空数据', '首屏返回 0 条，下拉刷新后有数据', Icons.inbox_outlined),
+  firstPageError('首屏失败', '首次加载失败，点“重试”后成功', Icons.cloud_off_outlined),
+  loadMoreError('加载更多失败', '第 2 页第一次失败，再次上拉成功', Icons.vertical_align_bottom_rounded),
+  refreshError('刷新失败', '下拉刷新失败：保留旧数据并提示', Icons.sync_problem_outlined);
 
-  const ListScenario(this.title, this.description);
+  const ListScenario(this.title, this.description, this.icon);
 
   final String title;
   final String description;
+  final IconData icon;
 }
 
 final demoListProvider = AsyncNotifierProvider.autoDispose

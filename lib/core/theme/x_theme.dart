@@ -3,6 +3,21 @@ import 'package:flutter/material.dart';
 /// 默认品牌色。换主题色改这一行，或在 `XTheme.create(primary:)` 里传。
 const brandColor = Color(0xFF1677FF);
 
+/// 品牌渐变：从品牌色算出一个更深的邻近色，用在头图、头像、标志这类需要强调的地方。
+/// 换品牌色时渐变自动跟着变。
+///
+/// ```dart
+/// XContainer(colors: brandGradient(context.primary), begin: Alignment.topLeft, end: Alignment.bottomRight)
+/// ```
+List<Color> brandGradient(Color primary) {
+  final hsl = HSLColor.fromColor(primary);
+  final deep = hsl
+      .withHue((hsl.hue + 24) % 360)
+      .withLightness((hsl.lightness * 0.72).clamp(0.0, 1.0))
+      .toColor();
+  return [primary, Color.lerp(deep, const Color(0xFF4B3FA8), 0.35)!];
+}
+
 /// 空白间隔。v 是上下间隔（放在 Column 里），h 是左右间隔（放在 Row 里），后面的数字就是大小。
 ///
 /// ```dart
@@ -140,13 +155,13 @@ class XColors extends ThemeExtension<XColors> {
     required this.danger,
   });
 
-  /// 主要文字 #333
+  /// 主要文字
   final Color text;
 
-  /// 次要文字 #666
+  /// 次要文字
   final Color textSecondary;
 
-  /// 提示 / 占位文字 #999
+  /// 提示 / 占位文字
   final Color textHint;
 
   /// 禁用文字
@@ -175,15 +190,15 @@ class XColors extends ThemeExtension<XColors> {
   final Color danger;
 
   static const light = XColors(
-    text: Color(0xFF333333),
-    textSecondary: Color(0xFF666666),
-    textHint: Color(0xFF999999),
-    textDisabled: Color(0xFFC8C9CC),
-    divider: Color(0xFFEEEEEE),
-    border: Color(0xFFDDDDDD),
-    background: Color(0xFFF5F5F5),
+    text: Color(0xFF1F2329),
+    textSecondary: Color(0xFF646A73),
+    textHint: Color(0xFF8F959E),
+    textDisabled: Color(0xFFC9CDD4),
+    divider: Color(0xFFEFF0F2),
+    border: Color(0xFFDEE0E3),
+    background: Color(0xFFF4F5F7),
     card: Color(0xFFFFFFFF),
-    fill: Color(0xFFF7F8FA),
+    fill: Color(0xFFF2F3F5),
     mask: Color(0x73000000),
     success: Color(0xFF00B578),
     warning: Color(0xFFFF8F1F),
@@ -191,15 +206,15 @@ class XColors extends ThemeExtension<XColors> {
   );
 
   static const dark = XColors(
-    text: Color(0xFFE5E5E5),
-    textSecondary: Color(0xFFA3A3A3),
-    textHint: Color(0xFF737373),
-    textDisabled: Color(0xFF4D4D4D),
-    divider: Color(0xFF2A2A2A),
-    border: Color(0xFF3A3A3A),
-    background: Color(0xFF111111),
-    card: Color(0xFF1E1E1E),
-    fill: Color(0xFF2A2A2A),
+    text: Color(0xFFEBEDF0),
+    textSecondary: Color(0xFFA6ABB3),
+    textHint: Color(0xFF6F757E),
+    textDisabled: Color(0xFF4A4F57),
+    divider: Color(0xFF26292E),
+    border: Color(0xFF363A40),
+    background: Color(0xFF0F1113),
+    card: Color(0xFF1A1C1F),
+    fill: Color(0xFF25282C),
     mask: Color(0x99000000),
     success: Color(0xFF1FC98E),
     warning: Color(0xFFFFA040),
@@ -357,7 +372,7 @@ abstract final class XTheme {
     XColors? colors,
 
     /// 按钮、输入框、卡片的圆角
-    double radius = 8,
+    double radius = 12,
     String? fontFamily,
   }) {
     final c = colors ?? (brightness == Brightness.dark ? XColors.dark : XColors.light);
@@ -406,7 +421,30 @@ abstract final class XTheme {
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: c.card,
         indicatorColor: brandColor.withValues(alpha: 0.12),
-        height: 64,
+        height: 60,
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeights.medium,
+            color: states.contains(WidgetState.selected) ? brandColor : c.textHint,
+          ),
+        ),
+        iconTheme: WidgetStateProperty.resolveWith(
+          (states) => IconThemeData(
+            size: 24,
+            color: states.contains(WidgetState.selected) ? brandColor : c.textHint,
+          ),
+        ),
+      ),
+      tabBarTheme: TabBarThemeData(
+        labelColor: brandColor,
+        unselectedLabelColor: c.textSecondary,
+        indicatorColor: brandColor,
+        indicatorSize: TabBarIndicatorSize.label,
+        dividerColor: c.divider,
+        dividerHeight: 0.5,
+        labelStyle: const TextStyle(fontSize: FontSizes.body, fontWeight: FontWeights.semibold),
+        unselectedLabelStyle: const TextStyle(fontSize: FontSizes.body),
       ),
       cardTheme: CardThemeData(
         elevation: 0,
@@ -439,13 +477,13 @@ abstract final class XTheme {
       textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(shape: buttonShape)),
       dialogTheme: DialogThemeData(
         backgroundColor: c.card,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: c.card,
         showDragHandle: false,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
         ),
       ),
       // iOS 风格的右滑返回

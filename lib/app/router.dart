@@ -7,12 +7,21 @@ import 'package:xjj_app_base/core/session/session.dart';
 import 'package:xjj_app_base/features/article/presentation/article_detail_page.dart';
 import 'package:xjj_app_base/features/article/presentation/article_list_page.dart';
 import 'package:xjj_app_base/features/auth/presentation/login_page.dart';
+import 'package:xjj_app_base/features/contract/presentation/contract_detail_page.dart';
+import 'package:xjj_app_base/features/contract/presentation/contract_form_page.dart';
+import 'package:xjj_app_base/features/contract/presentation/contract_list_page.dart';
 import 'package:xjj_app_base/features/demo/demo_list_page.dart';
 import 'package:xjj_app_base/features/demo/demo_page.dart';
-import 'package:xjj_app_base/features/demo/form_demo_page.dart';
+import 'package:xjj_app_base/features/demo/theme_page.dart';
 import 'package:xjj_app_base/features/demo/ui_kit_page.dart';
 import 'package:xjj_app_base/features/home/home_shell.dart';
+import 'package:xjj_app_base/features/home/presentation/dashboard_page.dart';
+import 'package:xjj_app_base/features/message/presentation/message_page.dart';
 import 'package:xjj_app_base/features/profile/profile_page.dart';
+import 'package:xjj_app_base/features/profile/settings_page.dart';
+import 'package:xjj_app_base/features/shop/presentation/cart_page.dart';
+import 'package:xjj_app_base/features/shop/presentation/product_detail_page.dart';
+import 'package:xjj_app_base/features/shop/presentation/shop_page.dart';
 import 'package:xjj_app_base/shared/ui/x_feedback.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -48,7 +57,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, _, shell) => HomeShell(shell: shell),
         branches: [
           StatefulShellBranch(
-            routes: [GoRoute(path: Routes.home, builder: (_, _) => const ArticleListPage())],
+            routes: [GoRoute(path: Routes.home, builder: (_, _) => const DashboardPage())],
           ),
           StatefulShellBranch(
             routes: [
@@ -56,9 +65,9 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: Routes.demo,
                 builder: (_, _) => const DemoPage(),
                 routes: [
+                  // 路径参数可能来自外部链接，非法值显示 404，不要抛异常
                   GoRoute(
                     path: 'list/:scenario',
-                    // 路径参数可能来自外部链接，非法值显示 404，不要抛异常
                     builder: (_, state) {
                       final scenario = ListScenario.values
                           .asNameMap()[state.pathParameters['scenario']];
@@ -66,13 +75,6 @@ final routerProvider = Provider<GoRouter>((ref) {
                           ? const NotFoundPage()
                           : DemoListPage(scenario: scenario);
                     },
-                  ),
-                  GoRoute(path: 'ui', builder: (_, _) => const UiKitPage()),
-                  // 页面自带底部操作栏：挂到根 Navigator，盖住底部导航
-                  GoRoute(
-                    path: 'form',
-                    parentNavigatorKey: rootNavigatorKey,
-                    builder: (_, _) => const FormDemoPage(),
                   ),
                 ],
               ),
@@ -84,10 +86,31 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
 
-      // 全屏页面（盖住底部导航）放在 shell 外面
+      // 全屏页面放在 shell 外面，会盖住底部导航
+      GoRoute(path: Routes.uiKit, builder: (_, _) => const UiKitPage()),
+      GoRoute(path: Routes.theme, builder: (_, _) => const ThemePage()),
+      GoRoute(path: Routes.settings, builder: (_, _) => const SettingsPage()),
+      GoRoute(path: Routes.messages, builder: (_, _) => const MessagePage()),
+
+      GoRoute(path: Routes.articles, builder: (_, _) => const ArticleListPage()),
       GoRoute(
         path: Routes.articleDetailPattern,
         builder: (_, state) => ArticleDetailPage(id: state.pathParameters['id']!),
+      ),
+
+      GoRoute(path: Routes.contracts, builder: (_, _) => const ContractListPage()),
+      // 静态路径要写在 :id 前面，否则 /contracts/new 会先匹配到详情
+      GoRoute(path: Routes.contractNew, builder: (_, _) => const ContractFormPage()),
+      GoRoute(
+        path: Routes.contractDetailPattern,
+        builder: (_, state) => ContractDetailPage(id: state.pathParameters['id']!),
+      ),
+
+      GoRoute(path: Routes.shop, builder: (_, _) => const ShopPage()),
+      GoRoute(path: Routes.cart, builder: (_, _) => const CartPage()),
+      GoRoute(
+        path: Routes.productDetailPattern,
+        builder: (_, state) => ProductDetailPage(id: state.pathParameters['id']!),
       ),
     ],
   );

@@ -74,6 +74,7 @@ final localStorageProvider = Provider<LocalStorage>(
 abstract final class StorageKeys {
   static const token = 'auth.token';
   static const themeMode = 'settings.themeMode';
+  static const notifyEnabled = 'settings.notifyEnabled';
 }
 
 class PrefsStorage implements LocalStorage {

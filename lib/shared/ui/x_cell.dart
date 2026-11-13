@@ -90,7 +90,9 @@ class XCell extends StatelessWidget {
                 ),
                 if (value != null) ...[
                   XGap.h12,
-                  Flexible(
+                  // 不参与弹性分配：按内容宽度贴右边，最宽占一半多一点，标题拿剩下的
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: context.screenSize.width * 0.55),
                     child: Text(
                       value!,
                       maxLines: 1,

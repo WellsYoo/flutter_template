@@ -13,18 +13,18 @@ enum _ContractType {
   final String label;
 }
 
-/// 表单示例：输入 / 选择 / 日期 / 单选 / 开关 / 多行 + 底部提交。
+/// 新建合同：表单页的标准写法。输入 / 选择 / 日期 / 单选 / 开关 / 多行 + 底部提交。
 ///
 /// 页面内的临时状态（表单字段）用 StatefulWidget 管理即可，不需要 Riverpod；
 /// 提交时调用 repository，成功后返回上一页。
-class FormDemoPage extends StatefulWidget {
-  const FormDemoPage({super.key});
+class ContractFormPage extends StatefulWidget {
+  const ContractFormPage({super.key});
 
   @override
-  State<FormDemoPage> createState() => _FormDemoPageState();
+  State<ContractFormPage> createState() => _ContractFormPageState();
 }
 
-class _FormDemoPageState extends State<FormDemoPage> {
+class _ContractFormPageState extends State<ContractFormPage> {
   String _name = '';
   String _phone = '';
   String _amount = '';
@@ -47,6 +47,8 @@ class _FormDemoPageState extends State<FormDemoPage> {
     return Validators.required(_name, '客户名称') ??
         Validators.phone(_phone) ??
         Validators.required(_amount, '合同金额') ??
+        // 输入限制拦不住只输了一个小数点的情况，转数字前再判断一次
+        (double.tryParse(_amount) == null ? '合同金额格式不正确' : null) ??
         (_type == null ? '请选择合同类型' : null) ??
         (_signDate == null ? '请选择签订日期' : null);
   }
@@ -76,7 +78,7 @@ class _FormDemoPageState extends State<FormDemoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('表单')),
+      appBar: AppBar(title: const Text('新建合同')),
       body: ListView(
         padding: const EdgeInsets.only(bottom: 24),
         children: [

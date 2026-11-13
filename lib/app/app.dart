@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xjj_app_base/app/router.dart';
 import 'package:xjj_app_base/core/theme/theme_mode.dart';
 import 'package:xjj_app_base/core/theme/x_theme.dart';
+import 'package:xjj_app_base/features/demo/demo_theme.dart';
 
 class App extends ConsumerWidget {
   const App({super.key});
@@ -14,8 +15,12 @@ class App extends ConsumerWidget {
       title: 'App',
       debugShowCheckedModeBanner: false,
       routerConfig: ref.watch(routerProvider),
-      theme: XTheme.light,
-      darkTheme: XTheme.dark,
+      // 示例里可以实时换品牌色，所以从 provider 取；真实项目直接 XTheme.light / XTheme.dark
+      theme: XTheme.create(primary: ref.watch(demoBrandColorProvider)),
+      darkTheme: XTheme.create(
+        brightness: Brightness.dark,
+        primary: ref.watch(demoBrandColorProvider),
+      ),
       themeMode: ref.watch(themeModeProvider),
       locale: const Locale('zh', 'CN'),
       supportedLocales: const [Locale('zh', 'CN'), Locale('en')],

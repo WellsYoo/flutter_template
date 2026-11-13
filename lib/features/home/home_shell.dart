@@ -18,18 +18,18 @@ class HomeShell extends StatelessWidget {
         onDestinationSelected: (i) => shell.goBranch(i, initialLocation: i == shell.currentIndex),
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: '首页',
+            icon: Icon(Icons.space_dashboard_outlined),
+            selectedIcon: Icon(Icons.space_dashboard_rounded),
+            label: '工作台',
           ),
           NavigationDestination(
             icon: Icon(Icons.widgets_outlined),
-            selectedIcon: Icon(Icons.widgets),
+            selectedIcon: Icon(Icons.widgets_rounded),
             label: '示例',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
+            icon: Icon(Icons.person_outline_rounded),
+            selectedIcon: Icon(Icons.person_rounded),
             label: '我的',
           ),
         ],

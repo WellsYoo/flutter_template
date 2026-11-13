@@ -185,8 +185,12 @@ class _XButtonState extends State<XButton> {
         Size(widget.block ? double.infinity : widget.width ?? 0, size.height),
       ),
       padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: size.padding)),
+      // 从主题的文字样式出发，XTheme.create(fontFamily:) 设置的字体才会对按钮生效
       textStyle: WidgetStatePropertyAll(
-        TextStyle(fontSize: size.fontSize, fontWeight: FontWeights.medium),
+        (context.text.labelLarge ?? const TextStyle()).copyWith(
+          fontSize: size.fontSize,
+          fontWeight: FontWeights.medium,
+        ),
       ),
       // 不是胶囊形时用主题里的圆角（XTheme.create 的 radius）
       shape: widget.round ? const WidgetStatePropertyAll(StadiumBorder()) : null,
